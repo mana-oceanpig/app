@@ -405,7 +405,7 @@
                 <div class="hero-text">
                     <h1>心のオアシス、<br>LuminaMind</h1>
                     <p>AIカウンセリングで、あなたの心の健康をサポートします。<br>24時間365日、いつでもどこでも。</p>
-                    <a href="/lumina-mind/conversations" class="cta-button">無料で始める</a>
+                    <a href="/app/conversations" class="cta-button">無料で始める</a>
                 </div>
                 <div class="hero-image">
                     <img src='{{ asset('storage/0710demo_top_V1.3.png') }}' alt="LuminaMind デモ画面">
@@ -448,7 +448,7 @@
                 <div class="trial-box">
                     <h3>31日間無料トライアル</h3>
                     <p>今すぐ始めて、24時間誰かに相談できる力を体験してください。</p>
-                    <a href="/lumina-mind/conversations" class="cta-button">無料トライアルを開始</a>
+                    <a href="/app/conversations" class="cta-button">無料トライアルを開始</a>
                 </div>
             </div>
         </section>
