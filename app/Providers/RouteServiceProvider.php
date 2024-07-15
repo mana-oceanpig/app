@@ -30,12 +30,11 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->routes(function () {
             Route::middleware('api')
-                ->prefix('app/api') // 'api' を 'app/api' に変更
+                ->prefix('api')  // 'app/api' から 'api' に戻す
                 ->group(base_path('routes/api.php'));
 
             Route::middleware('web')
-                ->prefix('app') // 'app' プレフィックスを追加
-                ->group(base_path('routes/web.php'));
+                ->group(base_path('routes/web.php'));  // 'app' プレフィックスを削除
         });
     }
 }
