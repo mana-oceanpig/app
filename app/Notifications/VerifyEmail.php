@@ -81,25 +81,19 @@ class VerifyEmail extends Notification
      */
     protected function verificationUrl($notifiable)
     {
-        $appUrl = config('app.url');
-        if (str_contains($appUrl, 'cloud9')) {
-            // Cloud9環境の場合、そのまま生成
-            $url = URL::temporarySignedRoute(
-                'verification.verify',
-                Carbon::now()->addMinutes(Config::get('auth.verification.expire', 60)),
-                [
-                    'id' => $notifiable->getKey(),
-                    'hash' => sha1($notifiable->getEmailForVerification()),
-                ]
-            );
-        } else {
-            // サクラレンタルサーバーの場合、URLを手動で構築
-            $params = [
+        if (static::$createUrlCallback) {
+            return call_user_func(static::$createUrlCallback, $notifiable);
+        }
+
+        $url = URL::temporarySignedRoute(
+            'verification.verify',
+            Carbon::now()->addMinutes(Config::get('auth.verification.expire', 60)),
+            [
                 'id' => $notifiable->getKey(),
                 'hash' => sha1($notifiable->getEmailForVerification()),
-            ];
-            $url = $appUrl . '/verify-email/' . $params['id'] . '/' . $params['hash'] . '?' . http_build_query($params);
-        }
+            ]
+        );
+
         \Log::info('Generated verification URL', ['url' => $url]);
         return $url;
     }
