@@ -23,8 +23,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        URL::forceScheme('https'); 
-        
+        if($this->app->environment('production')) {
+            \URL::forceRootUrl(config('app.url'));
+            \URL::forceScheme('https');
+        }
+
         VerifyEmail::toMailUsing(function ($notifiable, $url) {
         return (new MailMessage)
             ->subject('メールアドレスの確認')
