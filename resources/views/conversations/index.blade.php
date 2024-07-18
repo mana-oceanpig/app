@@ -344,6 +344,104 @@
         </div>
     </div>
     @endforeach
+    <!-- オンボーディングモーダル -->
+    @if($showOnboarding)
+    <style>
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+        .progress-container {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        .progress-step {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #E0E0E0;
+            margin: 0 5px;
+            transition: background-color 0.3s ease;
+        }
+        .progress-step.active {
+            background-color: #4A90E2;
+        }
+        .content {
+            margin-bottom: 2rem;
+        }
+        .icon {
+            font-size: 3rem;
+            color: #4A90E2;
+            margin-bottom: 1rem;
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+        .nav-button {
+            background-color: #4A90E2;
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .nav-button:hover {
+            background-color: #3570B2;
+        }
+        .nav-button:disabled {
+            background-color: #A0A0A0;
+            cursor: not-allowed;
+        }
+        #start-button {
+            background-color: #2ECC71;
+        }
+        #start-button:hover {
+            background-color: #25A25A;
+        }
+    </style>
+    
+    <div id="onboardingModal" class="modal-overlay">
+        <div class="modal-content">
+            <h1>LuminaMindへようこそ</h1>
+            <div class="progress-container">
+                <div class="progress-step active"></div>
+                <div class="progress-step"></div>
+                <div class="progress-step"></div>
+                <div class="progress-step"></div>
+            </div>
+            <div class="content">
+                <div class="icon">💬</div>
+                <h2>自由な対話</h2>
+                <p>ポジティブなこと、ネガティブなこと、今日起こったことなど、どんなトピックでも自由に話しかけてください。</p>
+            </div>
+            <div class="navigation-buttons">
+                <button id="back-button" class="nav-button" disabled>戻る</button>
+                <button id="next-button" class="nav-button">次へ</button>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -480,6 +578,98 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 初期Oasis画像の設定
     updateOasisImage({{ $user->points ?? 0 }});
+    
+    // 新しいオンボーディングモーダル関連のコード
+    const steps = [
+        {
+            icon: '💬',
+            title: '自由な対話',
+            description: 'ポジティブなこと、ネガティブなこと、今日起こったことなど、どんなトピックでも自由に話しかけてください。'
+        },
+        {
+            icon: '🕒',
+            title: 'いつでも利用可能',
+            description: '24時間365日いつでも話しかけられますが、毎日少しずつ対話を続けることが大切です。'
+        },
+        {
+            icon: '🤔',
+            title: 'ありのままの気持ちを',
+            description: '「えーっと...」「うーん...」など、悩んでいる言葉もそのまま伝えてください。納得するまで話し、満足したら「対話を終了」ボタンを押してください。'
+        },
+        {
+            icon: '🔒',
+            title: 'プライバシー保護',
+            description: 'あなたのプライバシーは完全に守られます。会社や産業医には許可なく情報を開示することはありません。'
+        }
+    ];
+
+    let currentStep = 0;
+    const onboardingModal = document.getElementById('onboardingModal');
+    const content = onboardingModal.querySelector('.content');
+    const nextButton = document.getElementById('next-button');
+    const backButton = document.getElementById('back-button');
+    const progressSteps = onboardingModal.querySelectorAll('.progress-step');
+
+    function updateContent() {
+        const step = steps[currentStep];
+        content.innerHTML = `
+            <div class="icon">${step.icon}</div>
+            <h2>${step.title}</h2>
+            <p>${step.description}</p>
+        `;
+
+        progressSteps.forEach((stepEl, index) => {
+            stepEl.classList.toggle('active', index <= currentStep);
+        });
+
+        backButton.disabled = currentStep === 0;
+
+        if (currentStep === steps.length - 1) {
+            nextButton.textContent = '始める';
+            nextButton.id = 'start-button';
+        } else {
+            nextButton.textContent = '次へ';
+            nextButton.id = 'next-button';
+        }
+    }
+
+    nextButton.addEventListener('click', () => {
+        if (currentStep < steps.length - 1) {
+            currentStep++;
+            updateContent();
+        } else {
+            onboardingModal.style.display = 'none';
+            fetch('{{ route("mark.onboarding.seen") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('オンボーディングが完了しました');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    });
+
+    backButton.addEventListener('click', () => {
+        if (currentStep > 0) {
+            currentStep--;
+            updateContent();
+        }
+    });
+
+    // 初期コンテンツの設定
+    updateContent();
+
+    // オンボーディングモーダルを表示
+    onboardingModal.style.display = 'flex';
 });
 </script>
 @endsection

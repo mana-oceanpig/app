@@ -14,7 +14,7 @@ class User extends Authenticatable implements MustVerifyEmail
     use HasFactory, Notifiable;
 
     protected $fillable = [
-        'name', 'email', 'password', 'points', 'last_bonus_date',
+        'name', 'email', 'password', 'points', 'last_bonus_date', 'has_seen_onboarding'
     ];
 
     protected $hidden = [
@@ -27,6 +27,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'last_login_at' => 'datetime',
         'last_bonus_date' => 'date',
         'password' => 'hashed',
+        'has_seen_onboarding' => 'boolean',
     ];
 
     public function conversations()

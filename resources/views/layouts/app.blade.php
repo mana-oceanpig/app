@@ -120,6 +120,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('conversations.start') }}">新しい対話を始める</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('usage.guide') }}">使い方</a>
+                    </li>
                 </ul>
                 @endauth
 

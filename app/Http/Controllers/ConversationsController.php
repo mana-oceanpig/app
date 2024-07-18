@@ -27,9 +27,13 @@ class ConversationsController extends Controller
 
     public function index()
     {
-        $user = Auth::user(); // 認証済みユーザーを取得
+        $user = Auth::user();
         $conversations = $user->conversations()->orderBy('created_at', 'desc')->get();
-        return view('conversations.index', compact('conversations', 'user'));
+        
+        // 初回ログインユーザーの場合、オンボーディングフラグをtrueに設定
+        $showOnboarding = !$user->has_seen_onboarding;
+        
+        return view('conversations.index', compact('conversations', 'user', 'showOnboarding'));
     }
     public function show($id)
     {
@@ -45,6 +49,18 @@ class ConversationsController extends Controller
             Log::error("Conversation with ID $id not found.");
             abort(404, 'Conversation not found');
         }
+    }
+    public function showUsageGuide()
+    {
+        return view('usage_guide');
+    }
+    public function markOnboardingAsSeen()
+    {
+        $user = Auth::user();
+        $user->has_seen_onboarding = true;
+        $user->save();
+
+        return response()->json(['success' => true]);
     }
 
     public function listen($id)

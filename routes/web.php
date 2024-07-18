@@ -29,6 +29,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/conversations', [ConversationsController::class, 'index'])->name('conversations.index');
     Route::get('/conversations/start', [ConversationsController::class, 'start'])->name('conversations.start');
     Route::post('/conversations', [ConversationsController::class, 'store'])->name('conversations.store');
+    Route::get('/usage-guide', [ConversationsController::class, 'showUsageGuide'])->name('usage.guide');
+    Route::post('/mark-onboarding-seen', [ConversationsController::class, 'markOnboardingAsSeen'])->name('mark.onboarding.seen');
     
     Route::get('/conversations/{id}', [ConversationsController::class, 'show'])->name('conversations.show');
     Route::get('/conversations/{id}/listen', [ConversationsController::class, 'listen'])->name('conversations.listen');
