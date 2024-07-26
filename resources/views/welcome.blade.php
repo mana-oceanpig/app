@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LuminaMind - AIカウンセリングで心の健康をサポート</title>
+    <title>LuminaMind - AIとの1on1で心のバランスを整える</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -256,7 +256,25 @@
             margin-bottom: 1rem;
             color: var(--primary-color);
         }
-        
+
+        .feature.coming-soon {
+            opacity: 0.5;
+            position: relative;
+        }
+
+        .feature.coming-soon::after {
+            content: 'Coming Soon';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
         .how-it-works {
             background-color: var(--light-gray);
         }
@@ -404,7 +422,7 @@
             <div class="container hero-content">
                 <div class="hero-text">
                     <h1>心のオアシス、<br>LuminaMind</h1>
-                    <p>AIカウンセリングで、あなたの心の健康をサポートします。<br>24時間365日、いつでもどこでも。</p>
+                    <p>本音を吐露できる場所が、現代には少なすぎるから。<br>AIとの1on1で、あなたの心のバランスを整えましょう。<br>24時間365日、いつでもどこでも。</p>
                     <a href="/app/conversations" class="cta-button">無料で始める</a>
                 </div>
                 <div class="hero-image">
@@ -416,8 +434,8 @@
         <section id="about" class="section">
             <div class="container">
                 <h2 class="section-title">LuminaMindとは</h2>
-                <p>LuminaMindは、AIを活用した心の健康サポートサービスです。日本では年々増加する精神疾患患者数や、コロナ禍による心の健康への影響が社会課題となっています。また、多くの労働者が仕事や職業生活に関する強い不安やストレスを抱えています。</p>
-                <p>私たちは、誰もが気軽に心の健康ケアにアクセスできる環境を作ることで、これらの課題に取り組みます。LuminaMindは、プライバシーを守りながら、いつでもどこでもサポートを提供し、心の健康を維持・改善するための新しい選択肢を提供します。</p>
+                <p>LuminaMindは、AIを活用した心のバランスサポートサービスです。現代社会では、仕事や日常生活のストレスから心のバランスを崩しやすい環境にあります。これは個人の幸福感だけでなく、仕事のパフォーマンスにも大きな影響を与えています。</p>
+                <p>私たちは、誰もが気軽に心の内省に必要な「対話の場」へアクセスできる環境を作ることで、これらの課題に取り組みます。LuminaMindは、プライバシーを守りながら、いつでもどこでもサポートを提供し、あなたの心のバランスを整え、生産性と創造性を高めるための新しい選択肢を提供します。</p>
             </div>
         </section>
 
@@ -426,18 +444,18 @@
                 <div class="features">
                     <div class="feature">
                         <div class="feature-icon">💬</div>
-                        <h3>AIカウンセラーとの対話</h3>
-                        <p>最新のAI技術を活用し、あなたの心の状態を理解し、適切なアドバイスを提供します。</p>
+                        <h3>AIコーチとの対話</h3>
+                        <p>最新のAI技術を活用し、あなたの心の状態を理解し、適切なアドバイスを提供します。ストレス軽減や生産性向上につながります。</p>
                     </div>
-                    <div class="feature">
+                    <div class="feature coming-soon">
                         <div class="feature-icon">🧠</div>
-                        <h3>神経伝達物質の可視化</h3>
-                        <p>セロトニン、ドーパミン、オキシトシンの量を簡単な質問から推定し、わかりやすく表示します。</p>
+                        <h3>心の状態の可視化</h3>
+                        <p>簡単な質問から、あなたの心の状態を分析し、わかりやすく表示します。自己理解を深め、効果的な改善策を見つけられます。</p>
                     </div>
-                    <div class="feature">
+                    <div class="feature coming-soon">
                         <div class="feature-icon">📊</div>
-                        <h3>カスタマイズされた回復プラン</h3>
-                        <p>あなたの状態に合わせた具体的な回復方法を提案し、心の健康をサポートします。</p>
+                        <h3>パーソナライズされた成長プラン</h3>
+                        <p>あなたの状態に合わせた具体的な改善方法を提案し、心のバランスと仕事のパフォーマンス向上をサポートします。</p>
                     </div>
                 </div>
             </div>
@@ -447,7 +465,7 @@
             <div class="container">
                 <div class="trial-box">
                     <h3>31日間無料トライアル</h3>
-                    <p>今すぐ始めて、24時間誰かに相談できる力を体験してください。</p>
+                    <p>今すぐ始めて、24時間自分自身と向き合える力を体験してください。心のバランスを整え、仕事も私生活もより充実したものに。</p>
                     <a href="/app/conversations" class="cta-button">無料トライアルを開始</a>
                 </div>
             </div>
@@ -469,13 +487,13 @@
                     </div>
                     <div class="step">
                         <div class="step-number">3</div>
-                        <h3>AIカウンセリング</h3>
-                        <p>AIカウンセラーとチャットを通じて対話します。悩みや不安を相談しましょう。</p>
+                        <h3>AIコーチングセッション</h3>
+                        <p>AIコーチとチャットを通じて対話します。考えや感情を整理し、新たな気づきを得ましょう。</p>
                     </div>
                     <div class="step">
                         <div class="step-number">4</div>
                         <h3>分析とアドバイス</h3>
-                        <p>AIが分析結果とカスタマイズされたアドバイスを提供します。</p>
+                        <p>AIが分析結果とカスタマイズされたアドバイスを提供します。心のバランスと仕事のパフォーマンス向上につなげます。</p>
                     </div>
                 </div>
             </div>
@@ -520,7 +538,7 @@
         const faqData = [
             {
                 question: "LuminaMindは医療サービスですか？",
-                answer: "LuminaMindは医療サービスではありません。心の健康をサポートするツールですが、専門的な医療アドバイスや診断、治療の代替にはなりません。深刻な症状がある場合は、必ず医療専門家にご相談ください。"
+                answer: "LuminaMindは医療サービスではありません。心のバランスと自己成長をサポートするツールですが、専門的な医療アドバイスや診断、治療の代替にはなりません。深刻な症状がある場合は、必ず医療専門家にご相談ください。"
             },
             {
                 question: "個人情報は安全ですか？",
@@ -532,11 +550,10 @@
             },
             {
                 question: "LuminaMindはどのくらいの頻度で利用できますか？",
-                answer: "LuminaMindは24時間365日いつでもご利用いただけます。ただし、心身の健康のために、適度な利用をおすすめします。毎日の短時間の利用が最も効果的です。"
+                answer: "LuminaMindは24時間365日いつでもご利用いただけます。毎日の短時間の利用が最も効果的です。定期的に自己内省の時間を持つことで、心のバランスを保ち、仕事のパフォーマンス向上にもつながります。"
             }
-            
         ];
-        
+
         const faqList = document.querySelector('.faq-list');
         
         faqData.forEach((item, index) => {
