@@ -422,7 +422,7 @@
             <div class="container hero-content">
                 <div class="hero-text">
                     <h1>心のオアシス、<br>LuminaMind</h1>
-                    <p>本音を吐露できる場所が、現代には少なすぎるから - <br>AIとの1on1で、あなたの心のバランスを整えましょう。<br>24時間365日、いつでもどこでも。</p>
+                    <p>本音を吐露できる場所が、現代には少なすぎるから ー <br>AIとの1on1で、あなたの心のバランスを整えましょう。<br>24時間365日、いつでもどこでも。</p>
                     <a href="/app/conversations" class="cta-button">無料で始める</a>
                 </div>
                 <div class="hero-image">
@@ -448,7 +448,7 @@
                         <p>最新のAI技術を活用し、あなたの心の状態を理解し、適切なアドバイスを提供します。ストレス軽減や生産性向上につながります。</p>
                     </div>
                     <div class="feature coming-soon">
-                        <div class="feature-icon">♡</div>
+                        <div class="feature-icon">💙</div>
                         <h3>心の状態の可視化</h3>
                         <p>簡単な質問から、あなたの心の状態を分析し、わかりやすく表示します。自己理解を深め、効果的な改善策を見つけられます。</p>
                     </div>
