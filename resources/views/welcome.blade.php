@@ -111,11 +111,11 @@
         
         .hero-text {
             flex: 1;
-            padding-right: 2rem;
+            padding-right: 1rem;
         }
         
         .hero h1 {
-            font-size: 4rem;
+            font-size: 3.5rem;
             font-weight: 700;
             margin-bottom: 1rem;
             line-height: 1.2;
