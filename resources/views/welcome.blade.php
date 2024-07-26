@@ -421,7 +421,7 @@
         <section id="home" class="hero">
             <div class="container hero-content">
                 <div class="hero-text">
-                    <h2>心のパーソナルジム、<br>LuminaMind</h2>
+                    <h1>心のパーソナルジム<br>LuminaMind</h1>
                     <p>本音を吐露できる場所が、現代には少なすぎるから ー <br>AIとの1on1で、あなたの心のバランスを整えましょう。<br>24時間365日、いつでもどこでも。</p>
                     <a href="/app/conversations" class="cta-button">無料で始める</a>
                 </div>
