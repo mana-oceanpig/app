@@ -32,7 +32,6 @@
     .btn-group {
         display: flex;
         justify-content: space-between;
-        gap: 1rem;
         margin-top: 1rem;
     }
 
