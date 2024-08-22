@@ -32,7 +32,7 @@
     .btn-group {
         display: flex;
         justify-content: space-between;
-        margin-top: 1rem;
+        gap: 0.5rem
     }
 
     .btn {
@@ -90,6 +90,70 @@
     @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
+    }
+    /*モーダル*/
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+        border-radius: 15px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .theme-group {
+        margin-bottom: 20px;
+    }
+
+    .theme-group h3 {
+        color: var(--primary-blue);
+        margin-bottom: 10px;
+    }
+
+    .theme-group label {
+        display: block;
+        margin-bottom: 10px;
+        cursor: pointer;
+    }
+
+    .theme-group input[type="checkbox"] {
+        margin-right: 10px;
+    }
+
+    .theme-group input[type="text"] {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    #themeForm button[type="submit"] {
+        background: linear-gradient(45deg, var(--primary-blue), var(--primary-green));
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    #themeForm button[type="submit"]:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     }
     
     #voice-button,
@@ -180,10 +244,13 @@
         .btn-group {
             flex-direction: column;
         }
-
         .btn {
             width: 100%;
             margin-bottom: 0.5rem;
+        }
+        .modal-content {
+            width: 95%;
+            margin: 10% auto;
         }
     }
 </style>
@@ -192,6 +259,31 @@
     <div class="text-center mb-4">
         <h1 class="mb-3">今日の対話 - {{ now()->format('m月d日') }}</h1>
     </div>
+    <!-- トークテーマモーダル -->
+        <div id="themeModal" class="modal">
+            <div class="modal-content">
+                <h2>今日はどんなことについて話したいですか？</h2>
+                <form id="themeForm">
+                    <div class="theme-group">
+                        <h3>テーマ1</h3>
+                        <label><input type="checkbox" name="theme" value="自分とうまく付き合う"> 自分とうまく付き合う（認知の癖や体調面の心配）</label>
+                        <label><input type="checkbox" name="theme" value="他者とうまく付き合う"> 他者とうまく付き合う（パートナーシップや人間関係）</label>
+                        <label><input type="checkbox" name="theme" value="仕事とうまく付き合う"> 仕事とうまく付き合う（働き方やパフォーマンス）</label>
+                        <label><input type="checkbox" name="theme" value="その他1" id="otherTheme1"> その他（自分でテーマを言語化する）</label>
+                        <input type="text" id="customTheme1" style="display: none;" placeholder="テーマを入力してください">
+                    </div>
+                    <div class="theme-group">
+                        <h3>テーマ2</h3>
+                        <label><input type="checkbox" name="theme" value="感情のコントロール"> 感情のコントロール</label>
+                        <label><input type="checkbox" name="theme" value="認知のコントロール"> 認知のコントロール</label>
+                        <label><input type="checkbox" name="theme" value="行動のコントロール"> 行動のコントロール</label>
+                        <label><input type="checkbox" name="theme" value="その他2" id="otherTheme2"> その他（自分でテーマを言語化する）</label>
+                        <input type="text" id="customTheme2" style="display: none;" placeholder="テーマを入力してください">
+                    </div>
+                    <button type="submit">選択完了</button>
+                </form>
+            </div>
+        </div>
     
     <div class="card mb-4">
         <div class="card-body">
@@ -250,7 +342,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const submitButton = messageForm.querySelector('button[type="submit"]');
     const voiceButton = document.getElementById('voice-button');
     const loadingOverlay = document.getElementById('loading-overlay');
+    const themeModal = document.getElementById('themeModal');
+    const themeForm = document.getElementById('themeForm');
+    const otherTheme1 = document.getElementById('otherTheme1');
+    const otherTheme2 = document.getElementById('otherTheme2');
+    const customTheme1 = document.getElementById('customTheme1');
+    const customTheme2 = document.getElementById('customTheme2');
     
+    let currentConversationId = {{ $conversation->id }};
+
     function scrollToBottom() {
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
@@ -336,7 +436,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
             body: JSON.stringify({
-                conversation_id: {{ $conversation->id }},
+                conversation_id: currentConversationId,
                 message: message
             })
         })
@@ -412,6 +512,90 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    function showThemeModal() {
+        themeModal.style.display = 'block';
+    }
+    
+    function hideThemeModal() {
+        themeModal.style.display = 'none';
+    }
+    
+    function initiateConversation() {
+        fetch('{{ route("conversations.initiate") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.conversation_id) {
+                currentConversationId = data.conversation_id;
+                addMessage(data.message, false);
+                setTimeout(() => {
+                    showThemeModal();
+                }, 1000); // 1秒後にモーダルを表示
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+    
+    otherTheme1.addEventListener('change', function() {
+        customTheme1.style.display = this.checked ? 'block' : 'none';
+    });
+    
+    otherTheme2.addEventListener('change', function() {
+        customTheme2.style.display = this.checked ? 'block' : 'none';
+    });
+    
+    themeForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const selectedThemes = Array.from(themeForm.querySelectorAll('input[name="theme"]:checked'))
+            .map(checkbox => {
+                if (checkbox.value === 'その他1' && customTheme1.value) {
+                    return customTheme1.value;
+                } else if (checkbox.value === 'その他2' && customTheme2.value) {
+                    return customTheme2.value;
+                }
+                return checkbox.value;
+            })
+            .filter(theme => theme !== 'その他1' && theme !== 'その他2');
+    
+        if (selectedThemes.length > 0) {
+            sendThemesToOpenAI(selectedThemes);
+            hideThemeModal();
+        } else {
+            alert('少なくとも1つのテーマを選択してください。');
+        }
+    });
+    
+    function sendThemesToOpenAI(themes) {
+        const themesString = "選択されたテーマ: " + themes.join(", ");
+        addMessage(themesString, true);
+        
+        fetch('{{ route("conversations.submit-themes") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                conversation_id: currentConversationId,
+                themes: themes
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.ai_message) {
+                addMessage(data.ai_message, false);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+    
+    // ページロード時に会話を開始
+    initiateConversation();
     scrollToBottom();
 });
 </script>

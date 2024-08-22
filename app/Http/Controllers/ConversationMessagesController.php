@@ -167,6 +167,66 @@ class ConversationMessagesController extends Controller
         Log::error('Timeout waiting for run completion. Thread ID: ' . $threadId . ', Run ID: ' . $runId);
         return false;
     }
+    public function initiateConversation(Request $request)
+    {
+        try {
+            $user_id = Auth::id();
+            
+            $conversation = Conversation::create([
+                'user_id' => $user_id,
+                'status' => Conversation::STATUS_IN_PROGRESS,
+                'last_activity_at' => Carbon::now(),
+            ]);
+    
+            $greeting = $this->getOpenAIResponse($conversation, "こんにちは");
+    
+            $this->saveMessage($conversation->id, $greeting, 'assistant');
+    
+            return response()->json([
+                'message' => $greeting,
+                'conversation_id' => $conversation->id,
+                'show_theme_modal' => true,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in initiateConversation: ' . $e->getMessage());
+            return response()->json(['error' => 'An error occurred while initiating the conversation.'], 500);
+        }
+    }
+
+    public function submitThemes(Request $request)
+    {
+        try {
+            $request->validate([
+                'conversation_id' => 'required|exists:conversations,id',
+                'themes' => 'required|array',
+            ]);
+    
+            $conversation_id = $request->input('conversation_id');
+            $themes = $request->input('themes');
+    
+            $conversation = Conversation::findOrFail($conversation_id);
+    
+            $themesString = "選択されたテーマ: " . implode(", ", $themes);
+    
+            // ユーザーメッセージとして保存
+            $this->saveMessage($conversation_id, $themesString, 'user');
+    
+            // OpenAIからの応答を取得
+            $response = $this->getOpenAIResponse($conversation, $themesString);
+    
+            // AIの応答を保存
+            $this->saveMessage($conversation_id, $response, 'assistant');
+    
+            return response()->json([
+                'user_message' => $themesString,
+                'ai_message' => $response,
+                'conversation_id' => $conversation->id,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in submitThemes: ' . $e->getMessage());
+            return response()->json(['error' => 'An error occurred while submitting themes.'], 500);
+        }
+    }
 
     public function generateAndSaveSummary(Conversation $conversation)
     {
