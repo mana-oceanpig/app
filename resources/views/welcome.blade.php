@@ -61,6 +61,20 @@
             color: var(--primary-color);
         }
         
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+        
+        .menu-toggle span {
+            width: 25px;
+            height: 3px;
+            background-color: var(--primary-color);
+            margin: 2px 0;
+            transition: all 0.3s ease;
+        }
+        
         nav ul {
             display: flex;
             list-style-type: none;
@@ -137,62 +151,6 @@
             height: auto;
             margin-left: -150px;
             border-radius: 10px;
-        }
-        /* Free Trial Section */
-
-        .free-trial {
-            background-color: var(--background-color);
-            color: var(--text-color);
-            text-align: center;
-            padding: 3rem 0;
-        }
-
-        .free-trial p {
-            font-size: 1.2rem;
-            margin-bottom: 1rem;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .trial-box {
-            background-color: white;
-            border-radius: 20px;
-            padding: 2rem;
-            max-width: 600px;
-            margin: 0 auto;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .trial-box:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-        }
-
-        .trial-box h3 {
-            font-size: 1.8rem;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-        }
-
-        .trial-box p {
-            font-size: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .free-trial .cta-button {
-            background-color: var(--accent-color);
-            color: white;
-            font-size: 1rem;
-            padding: 1rem 2.2rem;
-            display: inline-block;
-        }
-
-        .free-trial .cta-button:hover {
-            background-color: #e69100;
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
         
         .cta-button {
@@ -363,6 +321,31 @@
         }
         
         @media (max-width: 768px) {
+            .menu-toggle {
+                display: flex;
+            }
+            
+            nav ul {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background-color: var(--background-color);
+                flex-direction: column;
+                padding: 1rem 0;
+                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            }
+            
+            nav ul.active {
+                display: flex;
+            }
+            
+            nav ul li {
+                margin: 1rem 0;
+                text-align: center;
+            }
+            
             .hero-content {
                 flex-direction: column;
             }
@@ -373,32 +356,38 @@
                 padding-right: 0;
                 margin-bottom: 2rem;
             }
-            .free-trial {
-                padding: 6rem 0;
-            }
-        
-            .free-trial .section-title {
+            
+            .hero h1 {
                 font-size: 2.5rem;
             }
-        
-            .trial-box {
-                padding: 2rem;
-            }
-        
-            .trial-box h3 {
-                font-size: 1.6rem;
-            }
-        
-            .trial-box p {
+            
+            .hero p {
                 font-size: 1rem;
             }
-        
+            
+            .hero-image img {
+                width: 100%;
+                margin-left: 0;
+            }
+            
+            .section-title {
+                font-size: 2.5rem;
+            }
+            
             .how-it-works-steps {
                 flex-direction: column;
             }
         
             .step {
                 margin: 1rem 0;
+            }
+            
+            .feature {
+                padding: 2rem;
+            }
+            
+            .feature h3 {
+                font-size: 1.5rem;
             }
         }
     </style>
@@ -407,6 +396,11 @@
     <header>
         <nav class="container">
             <div class="logo">LuminaMind</div>
+            <div class="menu-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
             <ul>
                 <li><a href="#home">ホーム</a></li>
                 <li><a href="#about">LuminaMindとは</a></li>
@@ -514,6 +508,14 @@
     </footer>
 
     <script>
+        // ハンバーガーメニューの制御
+        const menuToggle = document.querySelector('.menu-toggle');
+        const navMenu = document.querySelector('nav ul');
+
+        menuToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            menuToggle.classList.toggle('active');
+        });
         // スムーズスクロール
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
@@ -521,6 +523,9 @@
                 document.querySelector(this.getAttribute('href')).scrollIntoView({
                     behavior: 'smooth'
                 });
+                // モバイルメニューを閉じる
+                navMenu.classList.remove('active');
+                menuToggle.classList.remove('active');
             });
         });
         
