@@ -80,6 +80,14 @@
     .points-display small, .streak-display small{
         font-size: 1rem;
     }
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    .animate-bounce {
+        animation: bounce 0.6s ease-in-out infinite;
+    }
     .login-bonus-button {
         background: linear-gradient(45deg, var(--primary-orange), var(--primary-green));
         border: none;
@@ -458,16 +466,17 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                document.querySelector('.streak-display span').textContent = data.loginStreak;
-                document.querySelector('.points-display span').textContent = data.totalPoints;
+                document.querySelector('.streak-display span').innerHTML = `${data.loginStreak}<small style="font-size: 1rem; margin-left: 0.2rem;">日</small>`;
+                document.querySelector('.points-display span').innerHTML = `${data.totalPoints}<small style="font-size: 1rem; margin-left: 0.2rem;">pt</small>`;
                 updateOasisImage(data.totalPoints);
                 
                 if (data.canClaimBonus) {
-                    loginBonusBtn.classList.add('animate-float');
+                    loginBonusBtn.classList.remove('animate-float');
+                    loginBonusBtn.classList.add('animate-bounce');
                     loginBonusBtn.textContent = 'ログインボーナスを獲得';
                     loginBonusBtn.disabled = false;
                 } else {
-                    loginBonusBtn.classList.remove('animate-float');
+                    loginBonusBtn.classList.remove('animate-float', 'animate-bounce');
                     loginBonusBtn.textContent = 'ログインボーナスを獲得済';
                     loginBonusBtn.disabled = true;
                 }
@@ -495,7 +504,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert(data.message);
                 document.querySelector('.points-display span').textContent = data.totalPoints;
                 updateOasisImage(data.totalPoints);
-                this.classList.remove('animate-float');
+                this.classList.remove('animate-float', 'animate-bounce');
                 this.textContent = 'ログインボーナスを獲得済';
                 this.disabled = true;
             } else {
