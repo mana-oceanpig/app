@@ -43,7 +43,7 @@ class User extends Authenticatable implements MustVerifyEmail
     // 新しいメソッドを追加（オプション）
     public function canClaimLoginBonus()
     {
-        return !$this->last_bonus_date || Carbon::parse($this->last_bonus_date)->isYesterday();
+        return !$this->last_bonus_date || Carbon::parse($this->last_bonus_date)->addDay()->isPast();
     }
     public function updateLoginStreak()
     {
