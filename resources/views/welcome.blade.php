@@ -1,704 +1,728 @@
-@extends('layouts.app')
-
-@section('content')
-<style>
-    :root {
-        --primary-blue: #3498db;
-        --primary-green: #2ecc71;
-        --primary-orange: #f39c12;
-        --light-bg: #ecf0f1;
-    }
-    body {
-        background-color: var(--light-bg);
-    }
-    .dashboard-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 2rem 15px;
-    }
-    .login-section {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
-        justify-content: space-between;
-        align-items: stretch;
-        margin-bottom: 2rem;
-    }
-    .login-content {
-        flex: 1 1 100%;
-        min-width: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-    .card-style {
-        background-color: white;
-        border-radius: 15px;
-        padding: 1.5rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    .oasis-container {
-        position: relative;
-        width: 100%;
-        max-width: 150px;
-        aspect-ratio: 1 / 1;
-        margin-bottom: 0.5rem;
-    }
-    .oasis-image {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: contain; /* これにより、画像が歪まずにコンテナ内に収まります */
-        transition: opacity 0.5s ease-in-out;
-    }
-    .oasis-image.hidden {
-        opacity: 0;
-    }
-    .points-display{
-        font-size: 1rem;
-        font-weight: bold;
-        color: var(--primary-orange);
-        margin-bottom: 1rem;
-    }
-    .streak-display{
-        font-size: 1rem;
-        font-weight: bold;
-        color: var(--primary-orange);
-        margin-bottom: 1rem;
-        background-color: rgba(255, 255, 255, 0.6); /* 半透明の白色 */
-        border-radius: 15px;
-        padding: 1rem;
-        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1); /* ふわふわさせる影 */
-        margin-bottom: 1rem; /* 適宜調整 */
-        max-width: 200px;
-    }
-    .points-display span, .streak-display span{
-        display: block;
-        font-size: 2rem;
-    }
-    .points-display small, .streak-display small{
-        font-size: 1rem;
-    }
-    @keyframes bounce {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-10px); }
-    }
-    
-    .animate-bounce {
-        animation: bounce 0.6s ease-in-out infinite;
-    }
-    .login-bonus-button {
-        background: linear-gradient(45deg, var(--primary-orange), var(--primary-green));
-        border: none;
-        color: white;
-        font-weight: bold;
-        padding: 0.75rem 1.5rem;
-        font-size: 1rem;
-        border-radius: 50px;
-        transition: all 0.3s ease;
-    }
-    .login-bonus-button:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 7px 14px rgba(50, 50, 93, .1), 0 3px 6px rgba(0, 0, 0, .08);
-    }
-    .talk-button {
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-        background: linear-gradient(45deg, var(--primary-blue), var(--primary-green));
-        border: none;
-        color: white;
-        font-weight: bold;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-decoration: none;
-    }
-    .talk-button:hover {
-        transform: scale(1.1);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-    }
-    .conversations-section {
-        width: 100%;
-    }
-    .conversations-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
-        justify-content: center;
-    }
-    .card {
-        border-radius: 15px;
-        overflow: hidden;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        transition: all 0.3s ease;
-        border: none;
-    }
-    .card-body {
-        display: flex;
-        flex-direction: column;
-        padding: 1.5rem;
-    }
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-    }
-    .card-title {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 0.75rem;
-        color: var(--primary-green);
-    }
-    .title-container {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    .card-text{
-        margin-bottom: 0.5rem;
-    }
-    .card-actions{
-        margin-top: 1rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    .edit-button, .delete-button {
-        background: none;
-        border: none;
-        font-size: 1.2rem;
-        cursor: pointer;
-        transition: transform 0.3s ease;
-    }
-    .edit-button:hover, .delete-button:hover {
-        transform: scale(1.2);
-    }
-    .badge {
-        font-size: 0.8rem;
-        border-radius: 50px;
-        padding: 0.3em 0.6em;
-    }
-    .btn {
-        padding: 0.5rem 1rem;
-    }
-    h1, h2 {
-        color: var(--primary-blue);
-    }
-    @media (min-width: 576px) {
-        .login-content {
-            flex: 1 1 calc(50% - 0.5rem);
-        }
-        .oasis-container {
-            max-width: 180px; /* 少し大きくしました */
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LuminaMind - AIとの1on1で心のバランスを整える</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4A90E2;
+            --secondary-color: #50E3C2;
+            --accent-color: #F5A623;
+            --text-color: #333333;
+            --background-color: #FFFFFF;
+            --light-gray: #F8F8F8;
         }
         
-        .talk-button {
-            width: 180px;
-            height: 180px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-    }
-    @media (min-width: 768px) {
-        .login-section {
-            flex-wrap: nowrap;
+        
+        body {
+            font-family: 'Noto Sans JP', 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
         }
-        .login-content {
-            flex: 1;
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
         }
-        .oasis-container {
-            max-width: 150px;
-        }
-        .talk-button {
-            width: 200px;
-            height: 200px;
-        }
-        .streak-display {
-            max-width: 250px;
-        }
-    }
-    
-    @media (min-width: 992px) {
-    .login-section {
-        flex-wrap: nowrap;
-        }
-    .oasis-container {
-            max-width: 220px;
-        }
-    .talk-button {
-            width: 220px;
-            height: 220px;
-            font-size: 1.2rem;
-        }
-    .streak-display {
-            max-width: 300px;
-        }
-    }
-</style>
-
-<div class="dashboard-container">
-    <div class="login-section">
-        <div class="login-content">
-            <div class="oasis-container">
-                <img src='{{ asset('storage/oasis-level1.png') }}' alt="Oasis Level 1" class="oasis-image" id="oasis-level1">
-                <img src='{{ asset('storage/oasis-level2.png') }}' alt="Oasis Level 2" class="oasis-image hidden" id="oasis-level2">
-                <img src='{{ asset('storage/oasis-level3.png') }}' alt="Oasis Level 3" class="oasis-image hidden" id="oasis-level3">
-                <img src='{{ asset('storage/oasis-level4.png') }}' alt="Oasis Level 4" class="oasis-image hidden" id="oasis-level4">
-            </div>
-            <div class="points-display">
-                累計ポイント：
-                <span style="display: flex; align-items: center; justify-content: center;">
-                    <span style="font-size: 2rem;">{{ $user->points ?? 0 }}</span><small style="font-size: 1rem; margin-left: 0.2rem;">pt</small>
-                </span>
-            </div>
-            <button id="loginBonusBtn" class="login-bonus-button">ログインボーナスを獲得</button>
-        </div>
-        <div class="login-content">
-            <a href="{{ route('conversations.start') }}" class="talk-button">
-                話しかける
-            </a>
-        </div>
-        <div class="login-content">
-            <div class="streak-display">
-                連続ログイン日数：
-                <span style="display: flex; align-items: center; justify-content: center;">
-                    <span style="font-size: 2rem;">{{ $user->login_streak ?? 0 }}</span><small style="font-size: 1rem; margin-left: 0.2rem;">日</small>
-                </span>
-            </div>
-        </div>
-    </div>
-    <div class="conversations-section">
-        <h2 class="text-center mb-4">これまでの対話</h2>
-        <div class="conversations-grid">
-            @foreach($conversations as $conversation)
-                <div class="card">
-                    <div class="card-body">
-                        <div class="card-title">
-                            <div class="title-container">
-                                <h5 id="title-{{ $conversation->id }}">
-                                    @php
-                                        $summaryMessage = $conversation->messages()->where('summary', true)->first();
-                                        $title = '';
-                                        if ($summaryMessage) {
-                                            preg_match('/タイトル：(.+?)(?=\s*要約：|$)/u', $summaryMessage->message, $matches);
-                                            $title = $matches[1] ?? '';
-                                        }
-                                        $formattedDate = \Carbon\Carbon::parse($conversation->last_activity_at)->format('m月d日');
-                                        echo $title ?: $formattedDate . 'の対話';
-                                    @endphp
-                                </h5>
-                                <button class="edit-button" data-bs-toggle="modal" data-bs-target="#editTitleModal{{ $conversation->id }}" aria-label="編集">
-                                    ️🖊️
-                                </button>
-                            </div>
-                            <button type="button" class="delete-button" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $conversation->id }}" aria-label="削除">
-                                ×️
-                            </button>
-                        </div>
-                        <p class="card-text">
-                            <i class="fas fa-clock mr-2" style="color: var(--primary-orange);"></i>
-                            {{ \Carbon\Carbon::parse($conversation->last_activity_at)->format('Y年m月d日 H:i') }}
-                        </p>
-                        <p class="card-text">
-                            @if($conversation->status === App\Models\Conversation::STATUS_IN_PROGRESS)
-                                <span class="badge bg-primary" style="background-color: var(--primary-blue) !important;">進行中</span>
-                            @elseif($conversation->status === App\Models\Conversation::STATUS_COMPLETED)
-                                <span class="badge bg-success" style="background-color: var(--primary-green) !important;">完了</span>
-                            @elseif($conversation->status === App\Models\Conversation::STATUS_CANCELED)
-                                <span class="badge bg-cancel" style="background-color: var(--primary-orange) !important;">キャンセル</span>
-                            @else
-                                <span class="badge bg-secondary">{{ $conversation->status }}</span>
-                            @endif
-                        </p>
-                        <div class="card-actions">
-                            <a href="{{ route('conversations.show', $conversation->id) }}" class="btn btn-outline-primary rounded-pill" style="color: var(--primary-blue); border-color: var(--primary-blue);">詳細を見る</a>
-                            @if($conversation->status === App\Models\Conversation::STATUS_IN_PROGRESS)
-                                <a href="{{ route('conversations.listen', $conversation->id) }}" class="gradient-button btn rounded-pill">対話を続ける</a>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    </div>
-    @foreach($conversations as $conversation)
-    <!-- 編集モーダル -->
-    <div class="modal fade" id="editTitleModal{{ $conversation->id }}" tabindex="-1" aria-labelledby="editTitleModalLabel{{ $conversation->id }}" aria-hidden="true">
-        <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="editTitleModalLabel{{ $conversation->id }}">タイトルの編集</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="edit-form-{{ $conversation->id }}" onsubmit="updateTitle(event, {{ $conversation->id }})">
-                            <div class="mb-3">
-                                <label for="new-title-{{ $conversation->id }}" class="form-label">新しいタイトル</label>
-                                <input type="text" class="form-control" id="new-title-{{ $conversation->id }}" value="{{ $summaryMessage ? ($matches[1] ?? '') : '対話 #' . $conversation->id }}">
-                            </div>
-                            <div class="text-end">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
-                                <button type="submit" class="btn btn-primary">保存</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    <!-- 削除確認モーダル -->
-    <div class="modal fade" id="deleteModal{{ $conversation->id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ $conversation->id }}" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel{{ $conversation->id }}">削除確認</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>本当にこの対話を削除しますか？</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
-                    <form action="{{ route('conversations.destroy', $conversation->id) }}" method="POST">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger">削除</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    @endforeach
-    <!-- オンボーディングモーダル -->
-    @if($showOnboarding)
-    <style>
-        .modal-overlay {
+        
+        header {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
             position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        header.scrolled {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+        
+        .menu-toggle span {
+            width: 25px;
+            height: 3px;
+            background-color: var(--primary-color);
+            margin: 2px 0;
+            transition: all 0.3s ease;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style-type: none;
+        }
+        
+        nav ul li {
+            margin-left: 2rem;
+        }
+        
+        nav ul li a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        
+        nav ul li a:hover {
+            color: var(--primary-color);
+        }
+        
+        .hero {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 10rem 0 6rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+            right: 0;
+            bottom: 0;
+            background: url('/api/placeholder/1200/800') no-repeat center center;
+            background-size: cover;
+            opacity: 0.1;
         }
-        .modal-content {
+        
+        .hero-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hero-text {
+            flex: 1;
+            padding-right: 1rem;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .hero-image {
+            flex: 1;
+            position: relative;
+        }
+        
+        .hero-image img {
+            width: 160%;
+            height: auto;
+            margin-left: -150px;
+            border-radius: 10px;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 1rem 2rem;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+        }
+        
+        .cta-button:hover {
+            background-color: #e69100;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .free-trial {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            text-align: center;
+            padding: 3rem 0;
+        }
+
+        .free-trial p {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .trial-box {
             background-color: white;
             border-radius: 20px;
             padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            max-width: 500px;
-            width: 90%;
+            transition: all 0.3s ease;
         }
-        .progress-container {
-            display: flex;
-            justify-content: center;
-            margin: 2rem 0;
+
+        .trial-box:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
         }
-        .progress-step {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background-color: #E0E0E0;
-            margin: 0 5px;
-            transition: background-color 0.3s ease;
-        }
-        .progress-step.active {
-            background-color: #4A90E2;
-        }
-        .content {
-            margin-bottom: 2rem;
-        }
-        .icon {
-            font-size: 3rem;
-            color: #4A90E2;
+
+        .trial-box h3 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
             margin-bottom: 1rem;
         }
-        .navigation-buttons {
+
+        .trial-box p {
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .free-trial .cta-button {
+            background-color: var(--accent-color);
+            color: white;
+            font-size: 1rem;
+            padding: 1rem 2.2rem;
+            display: inline-block;
+        }
+
+        .free-trial .cta-button:hover {
+            background-color: #e69100;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section {
+            padding: 3rem 0;
+        }
+        
+        .section-title {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+        }
+        
+        .feature {
+            background-color: white;
+            padding: 3rem;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .feature-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+        }
+        
+        .feature h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .feature.coming-soon {
+            opacity: 0.5;
+            position: relative;
+        }
+
+        .feature.coming-soon::after {
+            content: 'Coming Soon';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .how-it-works {
+            background-color: var(--light-gray);
+        }
+        
+        .how-it-works-steps {
             display: flex;
             justify-content: space-between;
+            margin-top: 4rem;
         }
-        .nav-button {
-            background-color: #4A90E2;
+        
+        .step {
+            flex: 1;
+            text-align: center;
+            padding: 3rem;
+            background-color: white;
+            border-radius: 10px;
+            margin: 0 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .step:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            background-color: var(--primary-color);
             color: white;
-            border: none;
-            padding: 0.8rem 2rem;
-            font-size: 1rem;
-            border-radius: 50px;
+            border-radius: 50%;
+            line-height: 60px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        
+        .faq-item {
+            margin-bottom: 2rem;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .faq-question {
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            padding: 2rem;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.2rem;
         }
-        .nav-button:hover {
-            background-color: #3570B2;
+        
+        .faq-question::after {
+            content: '+';
+            font-size: 2rem;
+            transition: transform 0.3s ease;
         }
-        .nav-button:disabled {
-            background-color: #A0A0A0;
-            cursor: not-allowed;
+        
+        .faq-question.active::after {
+            transform: rotate(45deg);
         }
-        #start-button {
-            background-color: #2ECC71;
+        
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
         }
-        #start-button:hover {
-            background-color: #25A25A;
+        
+        .faq-answer-content {
+            padding: 2rem;
+            font-size: 1.1rem;
+        }
+        
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 4rem 0;
+        }
+        @media (max-width: 1200px) {
+            .hero h1 {
+                font-size: 3rem;
+            }
+    
+            .hero p {
+                font-size: 1.1rem;
+            }
+        }
+        @media (max-width: 992px) {
+            .hero h1 {
+                font-size: 2.5rem;
+                white-space: normal;
+            }
+    
+            .hero p {
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: flex;
+            }
+            
+            nav ul {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background-color: var(--background-color);
+                flex-direction: column;
+                padding: 1rem 0;
+                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            }
+            
+            nav ul.active {
+                display: flex;
+            }
+            
+            nav ul li {
+                margin: 1rem 0;
+                text-align: center;
+            }
+            
+            .hero-content {
+                flex-direction: column;
+            }
+        
+            .hero-text, .hero-image {
+                flex: none;
+                width: 100%;
+                padding-right: 0;
+                margin-bottom: 2rem;
+            }
+            
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .hero p {
+                font-size: 0.9rem;
+            }
+            
+            .hero-image img {
+                width: 100%;
+                margin-left: 0;
+            }
+            
+            .section-title {
+                font-size: 2.5rem;
+            }
+            
+            .free-trial {
+                padding: 2rem 0;
+            }
+
+            .trial-box {
+                max-width: 90%;
+                padding: 1.5rem;
+            }
+
+            .trial-box h3 {
+                font-size: 1.5rem;
+            }
+
+            .trial-box p {
+                font-size: 0.9rem;
+            }
+
+            .free-trial .cta-button {
+                padding: 0.8rem 1.8rem;
+                font-size: 0.9rem;
+            }
+            
+            .how-it-works-steps {
+                flex-direction: column;
+            }
+        
+            .step {
+                margin: 1rem 0;
+            }
+            
+            .feature {
+                padding: 2rem;
+            }
+            
+            .feature h3 {
+                font-size: 1.5rem;
+            }
+        }
+        @media (max-width: 576px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+    
+            .hero p br {
+                display: none;
+            }
         }
     </style>
-    
-    <div id="onboardingModal" class="modal-overlay">
-        <div class="modal-content">
-            <h1>LuminaMindへようこそ</h1>
-            <div class="progress-container">
-                <div class="progress-step active"></div>
-                <div class="progress-step"></div>
-                <div class="progress-step"></div>
-                <div class="progress-step"></div>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">LuminaMind</div>
+            <div class="menu-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
             </div>
-            <div class="content">
-                <div class="icon">💬</div>
-                <h2>自由な対話</h2>
-                <p>ポジティブなこと、ネガティブなこと、今日起こったことなど、どんなトピックでも自由に話しかけてください。</p>
+            <ul>
+                <li><a href="#home">ホーム</a></li>
+                <li><a href="#about">LuminaMindとは</a></li>
+                <li><a href="#features">特徴</a></li>
+                <li><a href="#how-it-works">利用方法</a></li>
+                <li><a href="#faq">よくあるご質問</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="hero">
+            <div class="container hero-content">
+                <div class="hero-text">
+                    <h1>心のパーソナルジム<br>LuminaMind</h1>
+                    <p>本音を吐露できる場所が、現代には少なすぎるから ー <br>AIとの1on1で、あなたの心のバランスを整えましょう。<br>24時間365日、いつでもどこでも。</p>
+                    <a href="/app/conversations" class="cta-button">無料で始める</a>
+                </div>
+                <div class="hero-image">
+                    <img src='{{ asset('storage/0710demo_top_V1.3.png') }}' alt="LuminaMind デモ画面">
+                </div>
             </div>
-            <div class="navigation-buttons">
-                <button id="back-button" class="nav-button" disabled>戻る</button>
-                <button id="next-button" class="nav-button">次へ</button>
+        </section>
+
+        <section id="about" class="section">
+            <div class="container">
+                <h2 class="section-title">LuminaMindとは</h2>
+                <p>LuminaMindは、AIを活用した心のバランスサポートサービスです。現代社会では、仕事や日常生活のストレスから心のバランスを崩しやすい環境にあります。これは個人の幸福感だけでなく、仕事のパフォーマンスにも大きな影響を与えています。</p>
+                <p>私たちは、誰もが気軽に心の内省に必要な「対話の場」へアクセスできる環境を作ることで、これらの課題に取り組みます。LuminaMindは、プライバシーを守りながら、いつでもどこでもサポートを提供し、あなたの心のバランスを整え、生産性と創造性を高めるための新しい選択肢を提供します。</p>
             </div>
-        </div>
-    </div>
-    @endif
-</div>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const loginBonusBtn = document.getElementById('loginBonusBtn');
+        </section>
 
-    function checkLoginStatus() {
-        fetch('{{ route("check.login.status") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                document.querySelector('.streak-display span').innerHTML = `${data.loginStreak}<small style="font-size: 1rem; margin-left: 0.2rem;">日</small>`;
-                document.querySelector('.points-display span').innerHTML = `${data.totalPoints}<small style="font-size: 1rem; margin-left: 0.2rem;">pt</small>`;
-                updateOasisImage(data.totalPoints);
-                
-                if (data.canClaimBonus) {
-                    loginBonusBtn.classList.remove('animate-float');
-                    loginBonusBtn.classList.add('animate-bounce');
-                    loginBonusBtn.textContent = 'ログインボーナスを獲得';
-                    loginBonusBtn.disabled = false;
-                } else {
-                    loginBonusBtn.classList.remove('animate-float', 'animate-bounce');
-                    loginBonusBtn.textContent = 'ログインボーナスを獲得済';
-                    loginBonusBtn.disabled = true;
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('エラーが発生しました: ' + error.message);
-        });
-    }
-
-    checkLoginStatus();
-
-    loginBonusBtn.addEventListener('click', function() {
-        fetch('{{ route("login.bonus") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                document.querySelector('.points-display span').textContent = data.totalPoints;
-                updateOasisImage(data.totalPoints);
-                this.classList.remove('animate-float', 'animate-bounce');
-                this.textContent = 'ログインボーナスを獲得済';
-                this.disabled = true;
-            } else {
-                alert(data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('エラーが発生しました。');
-        });
-    });
-
-    function updateOasisImage(points) {
-        const oasisImages = document.querySelectorAll('.oasis-image');
-        oasisImages.forEach(img => img.classList.add('hidden'));
-
-        if (points < 100) {
-            document.getElementById('oasis-level1').classList.remove('hidden');
-        } else if (points < 200) {
-            document.getElementById('oasis-level2').classList.remove('hidden');
-        } else if (points < 500) {
-            document.getElementById('oasis-level3').classList.remove('hidden');
-        } else {
-            document.getElementById('oasis-level4').classList.remove('hidden');
-        }
-    }
-
-    // タイトル編集機能
-    function updateTitle(event, id) {
-        event.preventDefault();
-        var newTitle = document.getElementById('new-title-' + id).value;
+        <section id="features" class="section">
+            <div class="container">
+                <div class="features">
+                    <div class="feature">
+                        <div class="feature-icon">💬</div>
+                        <h3>AIコーチとの対話</h3>
+                        <p>最新のAI技術を活用し、あなたの心の状態を理解し、適切なアドバイスを提供します。ストレス軽減や生産性向上につながります。</p>
+                    </div>
+                    <div class="feature coming-soon">
+                        <div class="feature-icon">💙</div>
+                        <h3>心の状態の可視化</h3>
+                        <p>簡単な質問から、あなたの心の状態を分析し、わかりやすく表示します。自己理解を深め、効果的な改善策を見つけられます。</p>
+                    </div>
+                    <div class="feature coming-soon">
+                        <div class="feature-icon">📊</div>
+                        <h3>パーソナライズされた成長プラン</h3>
+                        <p>あなたの状態に合わせた具体的な改善方法を提案し、心のバランスと仕事のパフォーマンス向上をサポートします。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
         
-        fetch('{{ route("conversations.updateTitle", ":id") }}'.replace(':id', id), {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify({ title: newTitle })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('HTTP status ' + response.status);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                document.getElementById('title-' + id).textContent = newTitle;
-                var modal = bootstrap.Modal.getInstance(document.getElementById('editTitleModal' + id));
-                modal.hide();
-            } else {
-                alert('タイトルの更新に失敗しました。');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('エラーが発生しました: ' + error.message);
+        <section id="free-trial" class="section free-trial">
+            <div class="container">
+                <div class="trial-box">
+                    <h3>31日間無料トライアル</h3>
+                    <p>今すぐ始めて、24時間自分自身と向き合える力を体験してください。心のバランスを整え、仕事も私生活もより充実したものに。</p>
+                    <a href="/app/conversations" class="cta-button">無料トライアルを開始</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="how-it-works" class="section">
+            <div class="container">
+                <h2 class="section-title">始め方はシンプルです</h2>
+                <div class="how-it-works-steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h3>アカウント作成</h3>
+                        <p>簡単な手順でアカウントを作成します。個人情報は最小限で構いません。</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h3>初期アセスメント</h3>
+                        <p>あなたの現在の状態を把握するための簡単な質問に答えます。</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h3>AIコーチングセッション</h3>
+                        <p>AIコーチとチャットを通じて対話します。考えや感情を整理し、新たな気づきを得ましょう。</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <h3>分析とアドバイス</h3>
+                        <p>AIが分析結果とカスタマイズされたアドバイスを提供します。心のバランスと仕事のパフォーマンス向上につなげます。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="faq" class="section faq">
+            <div class="container">
+                <h2 class="section-title">よくあるご質問</h2>
+                <div class="faq-list"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 LuminaMind. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // ハンバーガーメニューの制御
+        const menuToggle = document.querySelector('.menu-toggle');
+        const navMenu = document.querySelector('nav ul');
+
+        menuToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            menuToggle.classList.toggle('active');
         });
-    }
-
-    // モーダル起動
-    var editModals = document.querySelectorAll('[id^="editTitleModal"]');
-    editModals.forEach(function(modal) {
-        modal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget;
-            var conversationId = button.closest('.card').querySelector('[id^="title-"]').id.split('-')[1];
-            var currentTitle = document.getElementById('title-' + conversationId).textContent.trim();
-            document.getElementById('new-title-' + conversationId).value = currentTitle;
-        });
-    });
-
-    // フォームのsubmitイベントリスナーを設定
-    document.querySelectorAll('[id^="edit-form-"]').forEach(function(form) {
-        form.addEventListener('submit', function(event) {
-            var id = this.id.split('-')[2];
-            updateTitle(event, id);
-        });
-    });
-
-    // 初期Oasis画像の設定
-    updateOasisImage({{ $user->points ?? 0 }});
-    
-    // 新しいオンボーディングモーダル関連のコード
-    const steps = [
-        {
-            icon: '💬',
-            title: '自由な対話',
-            description: 'ポジティブなこと、ネガティブなこと、今日起こったことなど、どんなトピックでも自由に話しかけてください。'
-        },
-        {
-            icon: '🕒',
-            title: 'いつでも利用可能',
-            description: '24時間365日いつでも話しかけられますが、毎日少しずつ対話を続けることが大切です。'
-        },
-        {
-            icon: '🤔',
-            title: 'ありのままの気持ちを',
-            description: '「えーっと...」「うーん...」など、悩んでいる言葉もそのまま伝えてください。納得するまで話し、満足したら「対話を終了」ボタンを押してください。'
-        },
-        {
-            icon: '🔒',
-            title: 'プライバシー保護',
-            description: 'あなたのプライバシーは完全に守られます。会社や産業医には許可なく情報を開示することはありません。'
-        }
-    ];
-
-    let currentStep = 0;
-    const onboardingModal = document.getElementById('onboardingModal');
-    const content = onboardingModal.querySelector('.content');
-    const nextButton = document.getElementById('next-button');
-    const backButton = document.getElementById('back-button');
-    const progressSteps = onboardingModal.querySelectorAll('.progress-step');
-
-    function updateContent() {
-        const step = steps[currentStep];
-        content.innerHTML = `
-            <div class="icon">${step.icon}</div>
-            <h2>${step.title}</h2>
-            <p>${step.description}</p>
-        `;
-
-        progressSteps.forEach((stepEl, index) => {
-            stepEl.classList.toggle('active', index <= currentStep);
-        });
-
-        backButton.disabled = currentStep === 0;
-
-        if (currentStep === steps.length - 1) {
-            nextButton.textContent = '始める';
-            nextButton.id = 'start-button';
-        } else {
-            nextButton.textContent = '次へ';
-            nextButton.id = 'next-button';
-        }
-    }
-
-    nextButton.addEventListener('click', () => {
-        if (currentStep < steps.length - 1) {
-            currentStep++;
-            updateContent();
-        } else {
-            onboardingModal.style.display = 'none';
-            fetch('{{ route("mark.onboarding.seen") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    console.log('オンボーディングが完了しました');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
+        // スムーズスクロール
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+                // モバイルメニューを閉じる
+                navMenu.classList.remove('active');
+                menuToggle.classList.remove('active');
             });
-        }
-    });
+        });
+        
+        // ヘッダーのスクロール処理
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+        
+        // FAQ
+        const faqData = [
+            {
+                question: "LuminaMindは医療サービスですか？",
+                answer: "LuminaMindは医療サービスではありません。心のバランスと自己成長をサポートするツールですが、専門的な医療アドバイスや診断、治療の代替にはなりません。深刻な症状がある場合は、必ず医療専門家にご相談ください。"
+            },
+            {
+                question: "個人情報は安全ですか？",
+                answer: "はい、LuminaMindはユーザーのプライバシーを最優先に考えています。すべての個人情報は暗号化され、厳重に保護されています。また、匿名での利用も可能ですので、安心してご利用いただけます。"
+            },
+            {
+                question: "LuminaMindの利用料金はいくらですか？",
+                answer: "LuminaMindには無料プランと有料プランがあります。基本的な機能は無料でご利用いただけます。より高度な機能や頻繁な利用をご希望の方には、月額制の有料プランをご用意しています。詳細はお問い合わせください。"
+            },
+            {
+                question: "LuminaMindはどのくらいの頻度で利用できますか？",
+                answer: "LuminaMindは24時間365日いつでもご利用いただけます。毎日の短時間の利用が最も効果的です。定期的に自己内省の時間を持つことで、心のバランスを保ち、仕事のパフォーマンス向上にもつながります。"
+            }
+        ];
 
-    backButton.addEventListener('click', () => {
-        if (currentStep > 0) {
-            currentStep--;
-            updateContent();
-        }
-    });
-
-    // 初期コンテンツの設定
-    updateContent();
-
-    // オンボーディングモーダルを表示
-    onboardingModal.style.display = 'flex';
-});
-</script>
-@endsection
+        const faqList = document.querySelector('.faq-list');
+        
+        faqData.forEach((item, index) => {
+            const faqItem = document.createElement('div');
+            faqItem.classList.add('faq-item');
+            faqItem.innerHTML = `
+                <div class="faq-question" data-index="${index}">${item.question}</div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">${item.answer}</div>
+                </div>
+            `;
+            faqList.appendChild(faqItem);
+        });
+        
+        faqList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('faq-question')) {
+                const index = e.target.getAttribute('data-index');
+                const answer = e.target.nextElementSibling;
+                const isOpen = e.target.classList.contains('active');
+        
+                // すべての回答を閉じる
+                document.querySelectorAll('.faq-question').forEach(q => {
+                    q.classList.remove('active');
+                    q.nextElementSibling.style.maxHeight = null;
+                });
+        
+                // クリックされた質問の回答を開く
+                if (!isOpen) {
+                    e.target.classList.add('active');
+                    answer.style.maxHeight = answer.scrollHeight + "px";
+                }
+            }
+        });
+        
+        // アニメーション
+        const animateOnScroll = (entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate');
+                    observer.unobserve(entry.target);
+                }
+            });
+        };
+        
+        const observer = new IntersectionObserver(animateOnScroll, {
+            root: null,
+            threshold: 0.1
+        });
+        
+        document.querySelectorAll('.feature, .step, .faq-item').forEach(element => {
+            observer.observe(element);
+        });
+        
+        // ページロード時のアニメーション
+        window.addEventListener('load', () => {
+            document.body.classList.add('loaded');
+        });
+    </script>
+</body>
+</html>
