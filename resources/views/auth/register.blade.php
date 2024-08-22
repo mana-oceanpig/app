@@ -36,16 +36,20 @@
         }
         
         .container-fluid {
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
         
         .card {
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             border-radius: 20px;
             overflow: hidden;
+            width: 100%;
+            max-width: 450px;
+            margin: auto;
         }
         
         .card-body {
@@ -94,24 +98,51 @@
             transition: background 0.3s ease-in-out;
             padding: 0.75rem 1.5rem;
             border-radius: 10px;
+            width: 100%;
         }
         
         .gradient-button:hover {
             background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
         }
         
-        img {
-            width: 250%;
+        .image-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            height: 100%;
+        }
+        
+        .image-container img {
+            width: 100%;
             height: auto;
-            margin-left: -150px;
+            object-fit: cover;
+        }
+        
+        @media (max-width: 767px) {
+            .container-fluid {
+                padding: 10px;
+            }
+            
+            .card {
+                max-width: 100%;
+            }
+            
+            .card-body {
+                padding: 1.5rem;
+            }
+            
+            .image-container {
+                display: none;
+            }
         }
     </style>
 </head>
 <body class="bg-light">
     <div class="container-fluid">
         <div class="row w-100">
-            <div class="col-md-6 d-flex align-items-center justify-content-center bg-white">
-                <div class="card w-75">
+            <div class="col-md-6 d-flex align-items-center justify-content-center">
+                <div class="card">
                     <div class="card-body">
                         <form method="POST" action="{{ route('register') }}">
                             @csrf
@@ -154,7 +185,7 @@
                             <div class="form-check mb-4">
                                 <input class="form-check-input @error('terms') is-invalid @enderror" type="checkbox" name="terms" id="terms" required>
                                 <label class="form-check-label" for="terms">
-                                    LuminaMindの<a href="/terms" target="_blank">{{ __('利用規約') }}</a>と<a href="/privacy" target="_blank">{{ __('プライバシーポリシー') }}</a>に同意いたします
+                                    LuminaMindの<a href="/app/terms-of-service" target="_blank">{{ __('利用規約') }}</a>と<a href="/app/privacy-policy" target="_blank">{{ __('プライバシーポリシー') }}</a>に同意いたします
                                 </label>
                                 @error('terms')
                                     <span class="invalid-feedback" role="alert">
@@ -176,7 +207,9 @@
                 </div>
             </div>
             <div class="col-md-6 d-none d-md-flex bg-gradient align-items-center justify-content-center">
-                <img src="{{ asset('storage/0710demo_top_V1.3.png') }}" class="img-fluid" alt="Service Image">
+                <div class="image-container">
+                    <img src="{{ asset('storage/0710demo_top_V1.3.png') }}" class="img-fluid" alt="Service Image">
+                </div>
             </div>
         </div>
     </div>

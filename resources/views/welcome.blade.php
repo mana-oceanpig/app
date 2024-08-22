@@ -171,6 +171,61 @@
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
         
+        .free-trial {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            text-align: center;
+            padding: 3rem 0;
+        }
+
+        .free-trial p {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .trial-box {
+            background-color: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .trial-box:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .trial-box h3 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .trial-box p {
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .free-trial .cta-button {
+            background-color: var(--accent-color);
+            color: white;
+            font-size: 1rem;
+            padding: 1rem 2.2rem;
+            display: inline-block;
+        }
+
+        .free-trial .cta-button:hover {
+            background-color: #e69100;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
         .section {
             padding: 3rem 0;
         }
@@ -372,6 +427,28 @@
             
             .section-title {
                 font-size: 2.5rem;
+            }
+            
+            .free-trial {
+                padding: 2rem 0;
+            }
+
+            .trial-box {
+                max-width: 90%;
+                padding: 1.5rem;
+            }
+
+            .trial-box h3 {
+                font-size: 1.5rem;
+            }
+
+            .trial-box p {
+                font-size: 0.9rem;
+            }
+
+            .free-trial .cta-button {
+                padding: 0.8rem 1.8rem;
+                font-size: 0.9rem;
             }
             
             .how-it-works-steps {

@@ -20,6 +20,21 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/home', function () {
+    return view('home');
+});
+
+// プライバシーポリシーページ
+Route::get('/privacy-policy', function () {
+    return view('privacy-policy');
+})->name('privacy-policy');
+
+// 利用規約ページ
+Route::get('/terms-of-service', function () {
+    return view('terms-of-service');
+})->name('terms-of-service');
+
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

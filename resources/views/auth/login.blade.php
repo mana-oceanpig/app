@@ -13,7 +13,7 @@
 
     <!-- Custom CSS -->
     <style>
-            :root {
+        :root {
             --primary-color: #4A90E2;
             --secondary-color: #50E3C2;
             --accent-color: #F5A623;
@@ -36,16 +36,20 @@
         }
 
         .container-fluid {
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
 
         .card {
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             border-radius: 20px;
             overflow: hidden;
+            width: 100%;
+            max-width: 450px;
+            margin: auto;
         }
 
         .card-body {
@@ -94,23 +98,52 @@
             transition: background 0.3s ease-in-out;
             padding: 0.75rem 1.5rem;
             border-radius: 10px;
+            width: 100%;
         }
 
         .gradient-button:hover {
             background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
         }
 
-        img {
+        .image-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .image-container img {
             width: 100%;
             height: auto;
+            object-fit: cover;
             border-radius: 20px;
         }
+
+        @media (max-width: 767px) {
+            .container-fluid {
+                padding: 10px;
+            }
+            
+            .card {
+                max-width: 100%;
+            }
+            
+            .card-body {
+                padding: 1.5rem;
+            }
+            
+            .image-container {
+                display: none;
+            }
+        }
     </style>
+</head>
 <body class="bg-light">
     <div class="container-fluid">
         <div class="row w-100">
-            <div class="col-md-6 d-flex align-items-center justify-content-center bg-white">
-                <div class="card w-75">
+            <div class="col-md-6 d-flex align-items-center justify-content-center">
+                <div class="card">
                     <div class="card-body">
                         @if (session('status'))
                             <div class="alert alert-success" role="alert">
@@ -163,8 +196,10 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 d-flex align-items-center justify-content-center">
-                <img src="{{ asset('storage/0710demo_top_V1.3.png') }}" alt="ログインイメージ画像">
+            <div class="col-md-6 d-none d-md-flex align-items-center justify-content-center">
+                <div class="image-container">
+                    <img src="{{ asset('storage/0710demo_top_V1.3.png') }}" alt="ログインイメージ画像">
+                </div>
             </div>
         </div>
     </div>
