@@ -21,6 +21,10 @@
         color: white;
         font-weight: bold;
         transition: all 0.3s ease;
+        white-space: nowrap;
+        padding: 1rem 2rem;
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
     }
     .gradient-button:hover {
         transform: translateY(-3px);
@@ -34,6 +38,37 @@
     }
     h1 {
         color: var(--primary-blue);
+    }
+    @media (max-width: 992px) {
+        .gradient-button {
+            padding: 0.9rem 1.8rem;
+            font-size: 1.1rem;
+        }
+        .btn-outline-secondary {
+            padding: 0.7rem 1.4rem;
+            font-size: 0.95rem;
+        }
+    }
+    @media (max-width: 768px) {
+        .gradient-button {
+            padding: 0.8rem 1.6rem;
+            font-size: 1rem;
+        }
+        .btn-outline-secondary {
+            padding: 0.65rem 1.3rem;
+            font-size: 0.9rem;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .gradient-button {
+            padding: 0.7rem 1.4rem;
+            font-size: 0.9rem;
+        }
+        .btn-outline-secondary {
+            padding: 0.6rem 1.2rem;
+            font-size: 0.85rem;
+        }
     }
 </style>
 
@@ -49,7 +84,7 @@
                     <p class="mb-4">新しい対話を開始しますか？</p>
                     <form action="{{ route('conversations.store') }}" method="POST">
                         @csrf
-                        <button type="submit" class="gradient-button btn btn-lg rounded-pill px-5 py-3 mb-3">新しい対話を開始</button>
+                        <button type="submit" class="gradient-button btn rounded-pill">新しい対話を開始</button>
                     </form>
                     <a href="{{ route('conversations.index') }}" class="btn btn-outline-secondary rounded-pill px-4 py-2">対話一覧に戻る</a>
                 </div>
