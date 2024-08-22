@@ -25,15 +25,33 @@
         padding: 0.5rem 1rem;
         cursor: pointer;
     }
-    
     .gradient-button:hover {
         transform: translateY(-2px);
         box-shadow: 0 5px 10px rgba(50, 50, 93, .1), 0 2px 4px rgba(0, 0, 0, .08);
     }
+    .btn-group {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        white-space: nowrap;
+        transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
     
     .input-group {
         display: flex;
-        align-items: center;
+        align-items: flex-end;
         background-color: white;
         border-radius: 25px;
         padding: 0.5rem;
@@ -50,10 +68,36 @@
         margin-left: 0.5rem;
     }
     
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+    .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
     #voice-button,
     .btn-primary {
         color: var(--primary-blue);
-        padding: 1rem;
+        padding: 0.75rem;
+        font-size: 1.2rem;
         border: none;
         cursor: pointer;
         transition: background-color 0.3s ease;
@@ -94,6 +138,13 @@
         border: none;
         outline: none;
         flex: 1;
+        min-height: 40px;
+        max-height: 120px;
+        resize: none;
+        padding: 0.5rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        overflow-y: auto;
     }
     
     #thinking-message {
@@ -126,6 +177,16 @@
         border: none;
         color: white;
     }
+    @media (max-width: 768px) {
+        .btn-group {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+    }
 </style>
 
 <div class="container py-4">
@@ -155,7 +216,7 @@
         @csrf
         <input type="hidden" name="conversation_id" value="{{ $conversation->id }}">
         <div class="input-group">
-            <input type="text" name="message" id="message-input" class="form-control rounded-pill" required placeholder="メッセージを入力...">
+            <textarea name="message" id="message-input" class="form-control rounded-pill" required placeholder="メッセージを入力..."></textarea>
             <div class="input-group-append">
                 <button type="button" id="voice-button" class="btn btn-outline-primary rounded-pill">
                     <i class="bi bi-mic">️️</i>🎙
@@ -167,11 +228,15 @@
         </div>
     </form>
 
-    <div class="d-flex justify-content-between">
-        <button id="end-conversation" class="btn btn-end rounded-pill px-4 py-2">対話を終了</button>
-        <button id="cancel-conversation" class="btn btn-cancel rounded-pill px-4 py-2">対話をキャンセル</button>
-        <a href="{{ route('conversations.index') }}" class="btn btn-outline-secondary rounded-pill px-4 py-2">対話一覧に戻る</a>
+    <div class="btn-group">
+        <button id="end-conversation" class="btn btn-end rounded-pill">対話を終了</button>
+        <button id="cancel-conversation" class="btn btn-cancel rounded-pill">対話をキャンセル</button>
+        <a href="{{ route('conversations.index') }}" class="btn btn-outline-secondary rounded-pill">対話一覧に戻る</a>
     </div>
+</div>
+
+<div id="loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="loading-spinner"></div>
 </div>
 
 <script>
@@ -183,7 +248,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const summaryContent = document.getElementById('summary-content');
     const endConversationButton = document.getElementById('end-conversation');
     const cancelConversationButton = document.getElementById('cancel-conversation');
+    const submitButton = messageForm.querySelector('button[type="submit"]');
     const voiceButton = document.getElementById('voice-button');
+    const loadingOverlay = document.getElementById('loading-overlay');
     
     function scrollToBottom() {
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -200,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function() {
         messagesContainer.appendChild(messageDiv);
         scrollToBottom();
     }
-    //音声入力
+
     let recognition = null;
     
     voiceButton.addEventListener('click', function() {
@@ -236,14 +303,30 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    messageInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
 
+    messageInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && e.ctrlKey) {
+            e.preventDefault();
+            submitMessage();
+        }
+    });
+    
     messageForm.addEventListener('submit', function(event) {
         event.preventDefault();
+        submitMessage();
+    });
+
+    function submitMessage() {
         const message = messageInput.value.trim();
         if (!message) return;
 
         addMessage(message, true);
         messageInput.value = '';
+        messageInput.style.height = 'auto';
         thinkingMessage.style.display = 'block';
         scrollToBottom();
 
@@ -272,44 +355,62 @@ document.addEventListener('DOMContentLoaded', function() {
             thinkingMessage.style.display = 'none';
             addMessage('エラーが発生しました。もう一度お試しください。');
         });
-    });
+    }
 
-    endConversationButton.addEventListener('click', function() {
-        fetch('{{ route('conversations.complete', $conversation->id) }}', {
+    function showLoading() {
+        loadingOverlay.style.display = 'flex';
+    }
+
+    function hideLoading() {
+        loadingOverlay.style.display = 'none';
+    }
+
+    function performAction(url, actionName) {
+        showLoading();
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒タイムアウト
+
+        fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
+            },
+            signal: controller.signal
         })
-        .then(response => response.json())
+        .then(response => {
+            clearTimeout(timeoutId);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
+            hideLoading();
             alert(data.message);
             window.location.href = '{{ route('conversations.show', $conversation->id) }}';
         })
         .catch(error => {
+            hideLoading();
             console.error('Error:', error);
-            alert('対話の終了中にエラーが発生しました。');
+            if (error.name === 'AbortError') {
+                alert(`${actionName}がタイムアウトしました。もう一度お試しください。`);
+            } else {
+                alert(`${actionName}中にエラーが発生しました。もう一度お試しください。`);
+            }
         });
+    }
+
+    endConversationButton.addEventListener('click', function() {
+        if (confirm('対話を終了してもよろしいですか？')) {
+            performAction('{{ route('conversations.complete', $conversation->id) }}', '対話の終了');
+        }
     });
 
     cancelConversationButton.addEventListener('click', function() {
-        fetch('{{ route('conversations.cancel', $conversation->id) }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            alert(data.message);
-            window.location.href = '{{ route('conversations.show', $conversation->id) }}';
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('対話のキャンセル中にエラーが発生しました。');
-        });
+        if (confirm('対話をキャンセルしてもよろしいですか？')) {
+            performAction('{{ route('conversations.cancel', $conversation->id) }}', '対話のキャンセル');
+        }
     });
 
     scrollToBottom();
