@@ -19,14 +19,14 @@
     .login-section {
         display: flex;
         flex-wrap: wrap;
-        gap: 2rem;
+        gap: 1rem;
         justify-content: space-between;
         align-items: stretch;
         margin-bottom: 2rem;
     }
     .login-content {
-        flex: 1;
-        min-width: 300px;
+        flex: 1 1 100%;
+        min-width: 0;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -41,7 +41,8 @@
     .oasis-container {
         position: relative;
         width: 100%;
-        padding-bottom: 100%; /* これにより、高さが幅と同じになります */
+        max-width: 150px;
+        aspect-ratio: 1 / 1;
         margin-bottom: 0.5rem;
     }
     .oasis-image {
@@ -72,6 +73,7 @@
         padding: 1rem;
         box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1); /* ふわふわさせる影 */
         margin-bottom: 1rem; /* 適宜調整 */
+        max-width: 200px;
     }
     .points-display span, .streak-display span{
         display: block;
@@ -103,14 +105,14 @@
         box-shadow: 0 7px 14px rgba(50, 50, 93, .1), 0 3px 6px rgba(0, 0, 0, .08);
     }
     .talk-button {
-        width: 200px;
-        height: 200px;
+        width: 150px;
+        height: 150px;
         border-radius: 50%;
         background: linear-gradient(45deg, var(--primary-blue), var(--primary-green));
         border: none;
         color: white;
         font-weight: bold;
-        font-size: 1.2rem;
+        font-size: 1rem;
         transition: all 0.3s ease;
         display: flex;
         align-items: center;
@@ -188,34 +190,52 @@
     h1, h2 {
         color: var(--primary-blue);
     }
-    @media (min-width: 768px) {
-        .login-section {
-            flex-direction: row;
-            flex-wrap: wrap;
-            justify-content: space-around;
-        }
+    @media (min-width: 576px) {
         .login-content {
-            flex-basis: calc(33.333% - 1rem);
-            max-width: calc(33.333% - 1rem);
+            flex: 1 1 calc(50% - 0.5rem);
         }
-        .oasis-container, .talk-button-container, .login-bonus-container {
-            width: calc(50% - 1rem);
+        .oasis-container {
+            max-width: 180px; /* 少し大きくしました */
+        }
+        
+        .talk-button {
+            width: 180px;
+            height: 180px;
         }
     }
+    @media (min-width: 768px) {
+        .login-section {
+            flex-wrap: nowrap;
+        }
+        .login-content {
+            flex: 1;
+        }
+        .oasis-container {
+            max-width: 150px;
+        }
+        .talk-button {
+            width: 200px;
+            height: 200px;
+        }
+        .streak-display {
+            max-width: 250px;
+        }
+    }
+    
     @media (min-width: 992px) {
     .login-section {
         flex-wrap: nowrap;
         }
-    }
-    
-    @media (max-width: 767px) {
-        .login-section {
-            flex-direction: column;
+    .oasis-container {
+            max-width: 220px;
         }
-        .login-content {
-            width: 100%;
-            max-width: 300px; /* oasis-containerの最大幅を制限 */
-            margin: 0 auto;
+    .talk-button {
+            width: 220px;
+            height: 220px;
+            font-size: 1.2rem;
+        }
+    .streak-display {
+            max-width: 300px;
         }
     }
 </style>

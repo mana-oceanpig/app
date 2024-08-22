@@ -138,14 +138,14 @@
             <div id="messages-container" class="d-flex flex-column">
                 @foreach($messages->reverse() as $message)
                     <div class="message {{ $message->role_id == 1 ? 'message-user' : 'message-counselor' }}">
-                        <div><strong>{{ $message->role_id == 1 ? $conversation->user->name : 'カウンセラー' }}</strong></div>
+                        <div><strong>{{ $message->role_id == 1 ? $conversation->user->name : 'コーチ' }}</strong></div>
                         <div>{{ $message->message }}</div>
                         <small class="text-muted">{{ $message->created_at->format('Y-m-d H:i:s') }}</small>
                     </div>
                 @endforeach
             </div>
             <div id="thinking-message" class="message message-counselor" style="display: none;">
-                <div><strong>カウンセラー</strong></div>
+                <div><strong>コーチ</strong></div>
                 <div>...考え中</div>
             </div>
         </div>
@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${isUser ? 'message-user' : 'message-counselor'}`;
         messageDiv.innerHTML = `
-            <div><strong>${isUser ? '{{ $conversation->user->name }}' : 'カウンセラー'}</strong></div>
+            <div><strong>${isUser ? '{{ $conversation->user->name }}' : 'コーチ'}</strong></div>
             <div>${message}</div>
             <small class="text-muted">${new Date().toLocaleString()}</small>
         `;
