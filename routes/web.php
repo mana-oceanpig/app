@@ -62,6 +62,8 @@ Route::middleware('auth')->group(function () {
     
     Route::get('/conversations/{conversation}/messages', [ConversationMessagesController::class, 'store'])->name('conversationMessages.store');
     Route::post('/conversations/{conversation}/messages', [ConversationMessagesController::class, 'store'])->name('conversationMessages.store');
+    Route::post('/initiate-conversation', [ConversationMessagesController::class, 'initiateConversation'])->name('conversations.initiate');
+    Route::post('/submit-themes', [ConversationMessagesController::class, 'submitThemes'])->name('conversations.submit-themes');
 });
 
 require __DIR__.'/auth.php';
