@@ -26,6 +26,28 @@
         transform: translateY(-2px);
         box-shadow: 0 5px 10px rgba(50, 50, 93, .1), 0 2px 4px rgba(0, 0, 0, .08);
     }
+    .emotion-score {
+        width: 100%;
+        height: 20px;
+        background-color: #e0e0e0;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+    
+    .emotion-score-bar {
+        height: 100%;
+        transition: width 0.5s ease-in-out;
+    }
+    
+    .emotion-score-label {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 5px;
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
     .card {
         border-radius: 15px;
         overflow: hidden;
@@ -106,6 +128,15 @@
             max-width: 60%;
         }
     }
+    @media (max-width: 767px) {
+        .card-body {
+            flex-direction: column;
+        }
+        .summary-container {
+            margin-top: 1rem;
+            width: 100%;
+        }
+    }
 </style>
 
 <div class="container py-4">
@@ -160,9 +191,28 @@
                 <p class="card-text">更新日時: {{ optional($conversation->updated_at)->format('Y年m月d日 H:i:s') }}</p>
             </div>
             @if ($summaryMessage && $summaryText)
-                <div class="mt-3 summary-container">
+                <div class="summary-container">
                     <h5 class="card-title">今回のサマリ：</h5>
                     <p class="card-text summary-text">{{ $summaryText }}</p>
+                    @if(isset($feedbackScore) || isset($conversation->feedback_score))
+                        @php
+                            $score = $feedbackScore ?? $conversation->feedback_score;
+                            $normalizedScore = ($score + 5) / 10;
+                            $barWidth = max(0, min(100, $normalizedScore * 100));
+                            $barColor = $score >= 0 ? 'var(--primary-green)' : 'var(--primary-orange)';
+                        @endphp
+                        <h5 class="card-title mt-3">感情+-：{{ $score }}</h5>
+                        <div class="emotion-score">
+                            <div class="emotion-score-bar" style="width: {{ $barWidth }}%; background-color: {{ $barColor }};"></div>
+                        </div>
+                        <div class="emotion-score-label">
+                            <span>-5</span>
+                            <span>0</span>
+                            <span>+5</span>
+                        </div>
+                    @else
+                        <p class="mt-3">フィードバックスコアが設定されていません。</p>
+                    @endif
                 </div>
             @endif
         </div>

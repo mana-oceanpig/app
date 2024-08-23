@@ -348,7 +348,7 @@
 <div class="container py-4">
     <div class="header-container">
         <h1 class="mb-3">今日の対話 - {{ now()->format('m月d日') }}</h1>
-        <button id="assistantButton" class="assistant-button">アシスタント</button>
+        <button id="assistantButton" class="assistant-button">トークテーマ提案</button>
     </div>
     <!-- トークテーマモーダル -->
         <div id="themeModal" class="modal">

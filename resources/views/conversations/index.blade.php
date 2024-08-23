@@ -123,6 +123,21 @@
         transform: scale(1.1);
         box-shadow: 0 10px 20px rgba(0,0,0,0.2);
     }
+    .simple-graph {
+        width: 100%;
+        height: 100px;
+        margin-top: 1rem;
+    }
+    .analysis-link {
+        display: block;
+        text-align: right;
+        margin-top: 0.5rem;
+        color: var(--primary-blue);
+        text-decoration: none;
+    }
+    .analysis-link:hover {
+        text-decoration: underline;
+    }
     .conversations-section {
         width: 100%;
     }
@@ -159,6 +174,26 @@
         display: flex;
         align-items: center;
         gap: 0.5rem;
+    }
+    .feedback-score-bar {
+        width: 100%;
+        height: 4px;
+        background-color: #e0e0e0;
+        border-radius: 2px;
+        overflow: hidden;
+        margin-top: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .feedback-score-fill {
+        height: 100%;
+        transition: width 0.3s ease;
+    }
+
+    .feedback-score-text {
+        font-size: 0.8rem;
+        color: #666;
+        margin-top: 0.25rem;
     }
     .card-text{
         margin-bottom: 0.5rem;
@@ -269,6 +304,11 @@
                     <span style="font-size: 2rem;">{{ $user->login_streak ?? 0 }}</span><small style="font-size: 1rem; margin-left: 0.2rem;">日</small>
                 </span>
             </div>
+            <div class="simple-graph">
+                <!-- ここに簡易グラフを挿入 -->
+                <canvas id="weeklyMoodGraph"></canvas>
+            </div>
+            
         </div>
     </div>
     <div class="conversations-section">
@@ -299,6 +339,17 @@
                                 ×️
                             </button>
                         </div>
+                        @if($conversation->status === App\Models\Conversation::STATUS_COMPLETED && isset($conversation->feedback_score))
+                            <div class="feedback-score-bar">
+                                @php
+                                    $normalizedScore = ($conversation->feedback_score + 5) / 10; // -5 to +5 を 0 to 1 に変換
+                                    $barWidth = max(0, min(100, $normalizedScore * 100)); // 0-100の範囲に制限
+                                    $barColor = $conversation->feedback_score >= 0 ? 'var(--primary-green)' : 'var(--primary-orange)';
+                                @endphp
+                                <div class="feedback-score-fill" style="width: {{ $barWidth }}%; background-color: {{ $barColor }};"></div>
+                            </div>
+                            <div class="feedback-score-text">感情+-: {{ $conversation->feedback_score }}</div>
+                        @endif
                         <p class="card-text">
                             <i class="fas fa-clock mr-2" style="color: var(--primary-orange);"></i>
                             {{ \Carbon\Carbon::parse($conversation->last_activity_at)->format('Y年m月d日 H:i') }}
@@ -471,6 +522,7 @@
     </div>
     @endif
 </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const loginBonusBtn = document.getElementById('loginBonusBtn');
@@ -585,6 +637,31 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('エラーが発生しました: ' + error.message);
         });
     }
+    // 週間ムードグラフの描画
+    var ctx = document.getElementById('weeklyMoodGraph').getContext('2d');
+    var weeklyMoodGraph = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['月', '火', '水', '木', '金', '土', '日'],
+            datasets: [{
+                label: '週間ムード',
+                data: [1, 2, 0, -1, 3, 2, 4], // これはダミーデータです。実際のデータに置き換えてください
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 5,
+                    min: -5
+                }
+            }
+        }
+    });
 
     // モーダル起動
     var editModals = document.querySelectorAll('[id^="editTitleModal"]');
