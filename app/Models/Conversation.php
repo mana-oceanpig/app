@@ -25,7 +25,7 @@ class Conversation extends Model
     const AGENT_STATUS_THINKING = 'thinking';
     const AGENT_STATUS_REACTED = 'reacted';
 
-    protected $fillable = ['user_id', 'status', 'last_activity_at', 'agent_status'];
+    protected $fillable = ['user_id', 'status', 'last_activity_at', 'agent_status', 'feedback_score'];
 
     public function user()
     {
