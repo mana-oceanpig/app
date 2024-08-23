@@ -287,6 +287,17 @@ class ConversationsController extends Controller
             return false;
         }
     }
+    public function submitFeedback(Request $request, Conversation $conversation)
+    {
+        $validatedData = $request->validate([
+            'score' => 'required|integer|min:-5|max:5',
+        ]);
+    
+        $conversation->feedback_score = $validatedData['score'];
+        $conversation->save();
+    
+        return response()->json(['success' => true]);
+    }
 
     private function waitUntilRunCompleted($threadId, $runId)
     {

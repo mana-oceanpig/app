@@ -40,13 +40,28 @@ class ConversationMessagesController extends Controller
             if ($conversation->status !== Conversation::STATUS_IN_PROGRESS) {
                 return response()->json(['error' => 'This conversation has ended.'], 400);
             }
-
-            // Save user message
+            // テーマ選択メッセージの処理
+            if (Str::startsWith($message, '今回のテーマ:')) {
+                Log::info("Theme selection message received: $message");
+                // テーマメッセージを保存
+                $this->saveMessage($conversation_id, $message, 'user');
+                
+                // テーマに基づいた初期応答を生成
+                $initialResponse = $this->generateInitialResponse($message);
+                $this->saveMessage($conversation_id, $initialResponse, 'assistant');
+    
+                return response()->json([
+                    'message' => $initialResponse,
+                    'conversation_id' => $conversation->id,
+                ]);
+            }
+    
+            // 通常のメッセージ処理
             $this->saveMessage($conversation_id, $message, 'user');
-
+    
             // Get OpenAI response
             $response = $this->getOpenAIResponse($conversation, $message);
-
+    
             // Check if it's a completion request
             if (strtolower($message) === '対話を完了') {
                 $conversation->markAsCompleted();
@@ -167,67 +182,47 @@ class ConversationMessagesController extends Controller
         Log::error('Timeout waiting for run completion. Thread ID: ' . $threadId . ', Run ID: ' . $runId);
         return false;
     }
-    public function initiateConversation(Request $request)
+    private function generateInitialResponse($themeMessage)
     {
-        try {
-            $user_id = Auth::id();
-            
-            $conversation = Conversation::create([
-                'user_id' => $user_id,
-                'status' => Conversation::STATUS_IN_PROGRESS,
-                'last_activity_at' => Carbon::now(),
-            ]);
+        $themes = explode(',', str_replace('今回のテーマ:', '', $themeMessage));
+        $themes = array_map('trim', $themes);
+        $themeCount = count($themes);
     
-            $greeting = $this->getOpenAIResponse($conversation, "こんにちは");
+        $introductions = [
+            "興味深いテーマを選んでいただきましたね。",
+            "なるほど、大切なテーマですね。一緒にお話ししていきましょう。",
+            "なるほど、大切なテーマですね。一緒に考えていきましょう。"
+        ];
     
-            $this->saveMessage($conversation->id, $greeting, 'assistant');
+        $questions = [
+            "具体的にどのような点が気になっていますか？",
+            "何か特に悩んでいることや、改善したいと思っている部分はありますか？",
+            "最近経験したことや感じたことを教えていただけますか？"
+        ];
     
-            return response()->json([
-                'message' => $greeting,
-                'conversation_id' => $conversation->id,
-                'show_theme_modal' => true,
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error in initiateConversation: ' . $e->getMessage());
-            return response()->json(['error' => 'An error occurred while initiating the conversation.'], 500);
+        $response = $introductions[array_rand($introductions)] . " ";
+    
+        if ($themeCount == 1) {
+            $response .= "「{$themes[0]}」について、";
+        } elseif ($themeCount == 2) {
+            $response .= "「{$themes[0]}」と「{$themes[1]}」について、";
+        } else {
+            $lastTheme = array_pop($themes);
+            $response .= implode('」、「', $themes) . "」、そして「{$lastTheme}」について、";
         }
+    
+        $response .= $questions[array_rand($questions)] . " ";
+    
+        $encouragements = [
+            "どんなことでも構いませんので、お聞かせください。",
+            "些細なことでも大丈夫です。一緒に考えていきましょう。",
+            "あなたの思いや経験を聞かせていただけると嬉しいです。"
+        ];
+    
+        $response .= $encouragements[array_rand($encouragements)];
+    
+        return $response;
     }
-
-    public function submitThemes(Request $request)
-    {
-        try {
-            $request->validate([
-                'conversation_id' => 'required|exists:conversations,id',
-                'themes' => 'required|array',
-            ]);
-    
-            $conversation_id = $request->input('conversation_id');
-            $themes = $request->input('themes');
-    
-            $conversation = Conversation::findOrFail($conversation_id);
-    
-            $themesString = "選択されたテーマ: " . implode(", ", $themes);
-    
-            // ユーザーメッセージとして保存
-            $this->saveMessage($conversation_id, $themesString, 'user');
-    
-            // OpenAIからの応答を取得
-            $response = $this->getOpenAIResponse($conversation, $themesString);
-    
-            // AIの応答を保存
-            $this->saveMessage($conversation_id, $response, 'assistant');
-    
-            return response()->json([
-                'user_message' => $themesString,
-                'ai_message' => $response,
-                'conversation_id' => $conversation->id,
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error in submitThemes: ' . $e->getMessage());
-            return response()->json(['error' => 'An error occurred while submitting themes.'], 500);
-        }
-    }
-
     public function generateAndSaveSummary(Conversation $conversation)
     {
         Log::info('Starting summary generation for conversation: ' . $conversation->id);

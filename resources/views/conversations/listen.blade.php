@@ -15,6 +15,26 @@
         max-width: 150px;
         margin-bottom: 1rem;
     }
+    .header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .assistant-button {
+        background-color: var(--primary-blue);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .assistant-button:hover {
+        background-color: #2980b9;
+    }
     .gradient-button {
         background: linear-gradient(45deg, var(--primary-blue), var(--primary-green));
         border: none;
@@ -104,6 +124,7 @@
     }
 
     .modal-content {
+        position: relative;
         background-color: #fefefe;
         margin: 15% auto;
         padding: 20px;
@@ -112,6 +133,15 @@
         max-width: 500px;
         border-radius: 15px;
         box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .close-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
     }
 
     .theme-group {
@@ -150,10 +180,63 @@
         cursor: pointer;
         transition: all 0.3s ease;
     }
-
     #themeForm button[type="submit"]:hover {
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    .button-group {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+    .skip-button {
+        background-color: #f1f1f1;
+        color: #333;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .skip-button:hover {
+        background-color: #e1e1e1;
+    }
+    /*フィードバックモーダル*/
+    .feedback-scale {
+    width: 100%;
+    margin: 20px 0;
+    position: relative;
+    padding: 0 10px;
+    }
+    .feedback-scale input[type="range"] {
+        width: 100%;
+        margin: 0;
+    }
+    .scale-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+        position: relative;
+        height: 20px; /* ラベルの高さを固定 */
+    }
+    .scale-labels span {
+        position: absolute;
+        transform: translateX(-50%);
+    }
+    .scale-labels span:first-child {
+        left: 0;
+    }
+    .scale-labels span:nth-child(2) {
+        left: 50%;
+    }
+    .scale-labels span:last-child {
+        right: 0;
+        transform: translateX(50%);
+    }
+    #selectedScore {
+        text-align: center;
+        margin: 20px 0;
+        font-weight: bold;
     }
     
     #voice-button,
@@ -252,16 +335,25 @@
             width: 95%;
             margin: 10% auto;
         }
+        .header-container {
+            flex-direction: column;
+            align-items: center;
+        }
+        .assistant-button {
+            margin-top: 1rem;
+        }
     }
 </style>
 
 <div class="container py-4">
-    <div class="text-center mb-4">
+    <div class="header-container">
         <h1 class="mb-3">今日の対話 - {{ now()->format('m月d日') }}</h1>
+        <button id="assistantButton" class="assistant-button">アシスタント</button>
     </div>
     <!-- トークテーマモーダル -->
         <div id="themeModal" class="modal">
             <div class="modal-content">
+                <button id="closeThemeModal" class="close-button">✖️</button>
                 <h2>今日はどんなことについて話したいですか？</h2>
                 <form id="themeForm">
                     <div class="theme-group">
@@ -280,8 +372,27 @@
                         <label><input type="checkbox" name="theme" value="その他2" id="otherTheme2"> その他（自分でテーマを言語化する）</label>
                         <input type="text" id="customTheme2" style="display: none;" placeholder="テーマを入力してください">
                     </div>
-                    <button type="submit">選択完了</button>
+                    <div class="button-group">
+                        <button type="submit" class="gradient-button">選択完了</button>
+                        <button type="button" id="skipThemeSelection" class="skip-button">スキップ</button>
+                    </div>
                 </form>
+            </div>
+        </div>
+    <!-- フィードバックモーダル -->
+        <div id="feedbackModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h2>今回のトークテーマに関する感情は何点でしたか？</h2>
+                <div class="feedback-scale">
+                    <input type="range" id="emotionScore" name="emotionScore" min="-5" max="5" value="0" step="1">
+                    <div class="scale-labels">
+                        <span>-5</span>
+                        <span>0</span>
+                        <span>+5</span>
+                    </div>
+                </div>
+                <div id="selectedScore">選択された点数: 0</div>
+                <button id="submitFeedback" class="gradient-button">送信</button>
             </div>
         </div>
     
@@ -332,24 +443,25 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // DOM要素の取得
     const messageForm = document.getElementById('message-form');
     const messageInput = document.getElementById('message-input');
     const messagesContainer = document.getElementById('messages-container');
     const thinkingMessage = document.getElementById('thinking-message');
-    const summaryContent = document.getElementById('summary-content');
     const endConversationButton = document.getElementById('end-conversation');
     const cancelConversationButton = document.getElementById('cancel-conversation');
-    const submitButton = messageForm.querySelector('button[type="submit"]');
     const voiceButton = document.getElementById('voice-button');
     const loadingOverlay = document.getElementById('loading-overlay');
+    const emotionScoreInput = document.getElementById('emotionScore');
+    const selectedScoreDisplay = document.getElementById('selectedScore');
+    const submitFeedbackButton = document.getElementById('submitFeedback');
+    const assistantButton = document.getElementById('assistantButton');
     const themeModal = document.getElementById('themeModal');
     const themeForm = document.getElementById('themeForm');
-    const otherTheme1 = document.getElementById('otherTheme1');
-    const otherTheme2 = document.getElementById('otherTheme2');
-    const customTheme1 = document.getElementById('customTheme1');
-    const customTheme2 = document.getElementById('customTheme2');
+    const closeThemeModal = document.getElementById('closeThemeModal');
     
-    let currentConversationId = {{ $conversation->id }};
+    let currentConversationId = {{ $conversation->id ?? 'null' }};
+    let recognition = null;
 
     function scrollToBottom() {
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -367,8 +479,86 @@ document.addEventListener('DOMContentLoaded', function() {
         scrollToBottom();
     }
 
-    let recognition = null;
+    function submitMessage(message = null) {
+        const messageToSend = message || messageInput.value.trim();
+        if (!messageToSend) return;
+
+        if (!message) {
+            addMessage(messageToSend, true);
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+        }
+        thinkingMessage.style.display = 'block';
+        scrollToBottom();
+
+        sendMessageToServer(messageToSend);
+    }
+
+    function sendMessageToServer(message) {
+        fetch('{{ route('conversationMessages.store', ['conversation' => $conversation->id]) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                conversation_id: currentConversationId,
+                message: message
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            thinkingMessage.style.display = 'none';
+            addMessage(data.message);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            thinkingMessage.style.display = 'none';
+            addMessage('エラーが発生しました。もう一度お試しください。');
+        });
+    }
+
+    function showLoading() {
+        loadingOverlay.style.display = 'flex';
+    }
+
+    function hideLoading() {
+        loadingOverlay.style.display = 'none';
+    }
+
+    function showFeedbackModal() {
+        document.getElementById('feedbackModal').style.display = 'block';
+    }
     
+    function hideFeedbackModal() {
+        document.getElementById('feedbackModal').style.display = 'none';
+    }
+
+    function showThemeModal() {
+        themeModal.style.display = 'block';
+    }
+
+    function hideThemeModal() {
+        themeModal.style.display = 'none';
+    }
+
+    messageForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        submitMessage();
+    });
+
+    messageInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+
+    messageInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && e.ctrlKey) {
+            e.preventDefault();
+            submitMessage();
+        }
+    });
+
     voiceButton.addEventListener('click', function() {
         if (recognition && recognition.running) {
             recognition.stop();
@@ -401,201 +591,112 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('ご使用のブラウザは音声入力をサポートしていません。');
         }
     });
-    
-    messageInput.addEventListener('input', function() {
-        this.style.height = 'auto';
-        this.style.height = (this.scrollHeight) + 'px';
-    });
-
-    messageInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && e.ctrlKey) {
-            e.preventDefault();
-            submitMessage();
-        }
-    });
-    
-    messageForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        submitMessage();
-    });
-
-    function submitMessage() {
-        const message = messageInput.value.trim();
-        if (!message) return;
-
-        addMessage(message, true);
-        messageInput.value = '';
-        messageInput.style.height = 'auto';
-        thinkingMessage.style.display = 'block';
-        scrollToBottom();
-
-        fetch('{{ route('conversationMessages.store', ['conversation' => $conversation->id]) }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify({
-                conversation_id: currentConversationId,
-                message: message
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            thinkingMessage.style.display = 'none';
-            if (data.summary) {
-                summaryContent.textContent = data.summary;
-            } else {
-                addMessage(data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            thinkingMessage.style.display = 'none';
-            addMessage('エラーが発生しました。もう一度お試しください。');
-        });
-    }
-
-    function showLoading() {
-        loadingOverlay.style.display = 'flex';
-    }
-
-    function hideLoading() {
-        loadingOverlay.style.display = 'none';
-    }
-
-    function performAction(url, actionName) {
-        showLoading();
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒タイムアウト
-
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            signal: controller.signal
-        })
-        .then(response => {
-            clearTimeout(timeoutId);
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            hideLoading();
-            alert(data.message);
-            window.location.href = '{{ route('conversations.show', $conversation->id) }}';
-        })
-        .catch(error => {
-            hideLoading();
-            console.error('Error:', error);
-            if (error.name === 'AbortError') {
-                alert(`${actionName}がタイムアウトしました。もう一度お試しください。`);
-            } else {
-                alert(`${actionName}中にエラーが発生しました。もう一度お試しください。`);
-            }
-        });
-    }
 
     endConversationButton.addEventListener('click', function() {
         if (confirm('対話を終了してもよろしいですか？')) {
-            performAction('{{ route('conversations.complete', $conversation->id) }}', '対話の終了');
+            showLoading();
+            fetch('{{ route("conversations.complete", $conversation->id) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                alert(data.message);
+                showFeedbackModal();
+            })
+            .catch(error => {
+                hideLoading();
+                console.error('Error:', error);
+                alert('対話の終了中にエラーが発生しました。');
+            });
         }
     });
 
     cancelConversationButton.addEventListener('click', function() {
         if (confirm('対話をキャンセルしてもよろしいですか？')) {
-            performAction('{{ route('conversations.cancel', $conversation->id) }}', '対話のキャンセル');
+            showLoading();
+            fetch('{{ route('conversations.cancel', $conversation->id) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                alert(data.message);
+                window.location.href = '{{ route("conversations.show", $conversation->id) }}';
+            })
+            .catch(error => {
+                hideLoading();
+                console.error('Error:', error);
+                alert('対話のキャンセル中にエラーが発生しました。');
+            });
         }
     });
 
-    function showThemeModal() {
-        themeModal.style.display = 'block';
-    }
-    
-    function hideThemeModal() {
-        themeModal.style.display = 'none';
-    }
-    
-    function initiateConversation() {
-        fetch('{{ route("conversations.initiate") }}', {
+    emotionScoreInput.addEventListener('input', function() {
+        selectedScoreDisplay.textContent = '選択された点数: ' + this.value;
+    });
+
+    submitFeedbackButton.addEventListener('click', function() {
+        const score = emotionScoreInput.value;
+        showLoading();
+        fetch('{{ route("conversations.feedback", $conversation->id) }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
+            body: JSON.stringify({ score: score })
         })
         .then(response => response.json())
         .then(data => {
-            if (data.conversation_id) {
-                currentConversationId = data.conversation_id;
-                addMessage(data.message, false);
-                setTimeout(() => {
-                    showThemeModal();
-                }, 1000); // 1秒後にモーダルを表示
+            hideLoading();
+            if (data.success) {
+                alert('フィードバックありがとうございます！');
+                hideFeedbackModal();
+                window.location.href = '{{ route("conversations.show", $conversation->id) }}';
+            } else {
+                throw new Error('フィードバックの送信に失敗しました。');
             }
         })
-        .catch(error => console.error('Error:', error));
-    }
-    
-    otherTheme1.addEventListener('change', function() {
-        customTheme1.style.display = this.checked ? 'block' : 'none';
+        .catch(error => {
+            hideLoading();
+            console.error('Error:', error);
+            alert('エラーが発生しました。もう一度お試しください。');
+        });
     });
-    
-    otherTheme2.addEventListener('change', function() {
-        customTheme2.style.display = this.checked ? 'block' : 'none';
-    });
-    
+
+    assistantButton.addEventListener('click', showThemeModal);
+    closeThemeModal.addEventListener('click', hideThemeModal);
+
     themeForm.addEventListener('submit', function(e) {
         e.preventDefault();
         const selectedThemes = Array.from(themeForm.querySelectorAll('input[name="theme"]:checked'))
-            .map(checkbox => {
-                if (checkbox.value === 'その他1' && customTheme1.value) {
-                    return customTheme1.value;
-                } else if (checkbox.value === 'その他2' && customTheme2.value) {
-                    return customTheme2.value;
-                }
-                return checkbox.value;
-            })
+            .map(checkbox => checkbox.value)
             .filter(theme => theme !== 'その他1' && theme !== 'その他2');
-    
+
+        const customTheme1 = document.getElementById('customTheme1').value;
+        const customTheme2 = document.getElementById('customTheme2').value;
+
+        if (customTheme1) selectedThemes.push(customTheme1);
+        if (customTheme2) selectedThemes.push(customTheme2);
+
         if (selectedThemes.length > 0) {
-            sendThemesToOpenAI(selectedThemes);
+            const themeMessage = "今回のテーマ: " + selectedThemes.join(", ");
+            submitMessage(themeMessage);
             hideThemeModal();
         } else {
             alert('少なくとも1つのテーマを選択してください。');
         }
     });
-    
-    function sendThemesToOpenAI(themes) {
-        const themesString = "選択されたテーマ: " + themes.join(", ");
-        addMessage(themesString, true);
-        
-        fetch('{{ route("conversations.submit-themes") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify({
-                conversation_id: currentConversationId,
-                themes: themes
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.ai_message) {
-                addMessage(data.ai_message, false);
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
-    
-    // ページロード時に会話を開始
-    initiateConversation();
+
     scrollToBottom();
 });
 </script>
